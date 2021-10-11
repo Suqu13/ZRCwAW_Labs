@@ -6,7 +6,7 @@ import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.Server
 
 object HttpServer {
-  def instance[F[_]: Async](host: String, port: Int, app: HttpApp[F]): Resource[F, Server] =
+  def apply[F[_]: Async](host: String, port: Int, app: HttpApp[F]): Resource[F, Server] =
     BlazeServerBuilder[F]
       .bindHttp(port, host)
       .withHttpApp(app)

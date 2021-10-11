@@ -8,6 +8,7 @@ addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
 
 val http4sVersion = "0.23.5"
 val pureConfigVersion = "0.17.0"
+val circeVersion = "0.14.1"
 
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk" % "1.12.80",
@@ -15,7 +16,9 @@ libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-dsl" % http4sVersion,
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   "com.github.pureconfig" %% "pureconfig-cats-effect" % pureConfigVersion,
-  "com.github.pureconfig" %% "pureconfig" % pureConfigVersion
+  "com.github.pureconfig" %% "pureconfig" % pureConfigVersion,
+  "org.http4s" %% "http4s-circe" % http4sVersion,
+  "io.circe" %% "circe-generic" % circeVersion
 )
 
 scalacOptions ++= Seq(
