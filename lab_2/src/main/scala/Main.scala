@@ -13,15 +13,13 @@ object Main extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = for {
     config <- Config.load[IO]
-    s3Client = AwsS3Client[IO](config.aws)
-    s3AsyncClient = AwsS3AsyncClient[IO](config.aws)
     server <- (for {
-      syncClient <- s3Client
-      asyncClient <- s3AsyncClient
-    } yield (syncClient, asyncClient)) use {
-      case (syncClient, asyncClient) =>
-        val s3Service = S3ObjectStorageService[IO](syncClient, asyncClient)
-        val s3Api = new ObjectStorageApi(s3Service)
+      s3Client <- AwsS3Client[IO](config.aws)
+      s3AsyncClient <- AwsS3AsyncClient[IO](config.aws)
+    } yield (s3Client, s3AsyncClient)) use {
+      case (s3Client, s3AsyncClient) =>
+        val s3Service = S3ObjectStorageService[IO](s3Client, s3AsyncClient)
+        val s3Api = new ObjectStorageApi[IO](s3Service)
 
         val routes = app(s3Api)
 
