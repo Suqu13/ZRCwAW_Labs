@@ -23,5 +23,5 @@ case class Config(
 
 object Config {
   def load[F[_] : Sync]: F[Config] =
-    ConfigSource.default.loadF[F, Config]
+    ConfigSource.default.loadF[F, Config]()
 }

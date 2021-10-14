@@ -1,19 +1,29 @@
 package infrastructure.api
 
 import cats.effect.IO
-import com.amazonaws.services.s3.AmazonS3
-import org.http4s.HttpRoutes
-import org.http4s.dsl.io._
-import service.S3ObjectStorageService
+import fs2.io.readInputStream
+import infrastructure.http.HttpApi
 import io.circe.generic.auto._
+import org.http4s.HttpRoutes
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
+import org.http4s.dsl.io._
+import service.spi.ObjectStorageService
 
-class ObjectStorageApi(s3Client: AmazonS3) {
+class ObjectStorageApi(objectStorageService: ObjectStorageService[IO]) extends HttpApi[IO] {
 
-  lazy val s3Service = new S3ObjectStorageService[IO](s3Client)
+  val routes: HttpRoutes[IO] = HttpRoutes.of[IO] {
+    case GET -> Root / "s3" =>
+      objectStorageService.getStorages.flatMap(Ok(_))
+    case GET -> Root / "s3" / storageName =>
+      objectStorageService.listStorage(storageName).foldF(
+        e => NotFound(e.getMessage),
+        Ok(_)
+      )
+    case GET -> "s3" /: storageName /: key =>
+      objectStorageService.downloadObject(storageName, key.toString()).foldF(
+        e => NotFound(e.getMessage),
+        r => Ok(readInputStream(IO(r), 1024))
+      )
 
-  val routes = HttpRoutes.of[IO] {
-    case GET -> Root / "s3" / "buckets" =>
-      s3Service.getStorages.flatMap(Ok(_))
   }
 }
