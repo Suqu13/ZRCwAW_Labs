@@ -1,3 +1,3 @@
 package domain
 
-case class StoredObject(name: String)
+case class StoredObject(key: String)
