@@ -1,28 +1,85 @@
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Accordion, AccordionDetails, AccordionSummary, Typography,
+  Accordion, AccordionDetails, AccordionSummary, Typography, CircularProgress, Grid, Button,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { ObjectStorage } from '../api/model';
 import { getObjectStorages } from '../api/object-storage-api';
+import { ObjectStorage } from '../api/model';
 
-const objectStoragesHook = (): { objectsStorages: Array<ObjectStorage> } => {
+const objectStoragesHook = (): {
+  objectsStorages: Array<ObjectStorage>,
+  loading: boolean,
+  error: boolean,
+  fetchObjectStorages: () => void
+} => {
   const [objectsStorages, setObjectsStorages] = useState<Array<ObjectStorage>>([]);
-  useEffect((): void => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+
+  // TODO: rename
+  const fetchObjectStorages = (): void => {
+    if (!loading) setLoading(true);
+    if (error) setError(false);
     getObjectStorages()
-      .then((x) => setObjectsStorages(x));
+      .then((x) => {
+        setObjectsStorages(x);
+        setLoading(false);
+      }).catch(() => setError(true));
+  };
+
+  useEffect((): void => {
+    fetchObjectStorages();
   }, []);
 
   return {
     objectsStorages,
+    loading,
+    error,
+    fetchObjectStorages,
   };
 };
 
-const ObjectStorages: FunctionComponent = () => {
-  const { objectsStorages } = objectStoragesHook();
+const ObjectStorages = (): JSX.Element => {
+  const {
+    objectsStorages,
+    loading,
+    error,
+    fetchObjectStorages,
+  } = objectStoragesHook();
+
+  if (error) {
+    return (
+      <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Typography variant="h6" gutterBottom>
+          Unlucky, some error occured!
+        </Typography>
+        <Button variant="outlined" color="error" onClick={fetchObjectStorages}>
+          Reload
+        </Button>
+      </Grid>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Grid
+        container
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <CircularProgress />
+      </Grid>
+    );
+  }
 
   return (
-    <div>
+    <>
       {objectsStorages.map((objectsStorage) => (
         <Accordion key={objectsStorage.name}>
           <AccordionSummary
@@ -39,7 +96,7 @@ const ObjectStorages: FunctionComponent = () => {
           </AccordionDetails>
         </Accordion>
       ))}
-    </div>
+    </>
   );
 };
 
