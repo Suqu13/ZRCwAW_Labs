@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Accordion, AccordionDetails, AccordionSummary, Typography, CircularProgress, Grid, Button,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Typography,
+  CircularProgress,
+  Grid,
+  Button,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { getObjectStorages } from '../api/object-storage-api';
 import { ObjectStorage } from '../api/model';
+import { ObjectStorageContent } from './ObjectStorageContent';
 
 const objectStoragesHook = (): {
   objectsStorages: Array<ObjectStorage>,
@@ -39,7 +46,7 @@ const objectStoragesHook = (): {
   };
 };
 
-const ObjectStorages = (): JSX.Element => {
+const ObjectStorageList = (): JSX.Element => {
   const {
     objectsStorages,
     loading,
@@ -89,10 +96,7 @@ const ObjectStorages = (): JSX.Element => {
             <Typography>{objectsStorage.name}</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Typography>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-              malesuada lacus ex, sit amet blandit leo lobortis eget.
-            </Typography>
+            <ObjectStorageContent objectStorageName={objectsStorage.name} />
           </AccordionDetails>
         </Accordion>
       ))}
@@ -100,4 +104,4 @@ const ObjectStorages = (): JSX.Element => {
   );
 };
 
-export { ObjectStorages };
+export { ObjectStorageList };

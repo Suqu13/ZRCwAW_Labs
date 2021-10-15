@@ -6,7 +6,7 @@ import cats.implicits._
 import fs2.io.readInputStream
 import infrastructure.http.HttpApi
 import io.circe.generic.auto._
-import org.http4s.HttpRoutes
+import org.http4s.{HttpRoutes, Response, Status}
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl._
 import org.http4s.multipart.Multipart
@@ -30,6 +30,11 @@ class ObjectStorageApi[F[_]: Monad : Async](objectStorageService: ObjectStorageS
         objectStorageService.downloadObject(storageName, key.toString()).foldF(
           e => NotFound(e.getMessage),
           r => Ok(readInputStream[F](Monad[F].pure(r), 1024))
+        )
+      case DELETE -> "s3" /: storageName /: key =>
+        objectStorageService.deleteObject(storageName, key.toString()).foldF(
+          e => NotFound(e.getMessage),
+          s => Monad[F].pure(Response(Status.fromInt(s).getOrElse(InternalServerError)))
         )
       case req@POST -> "s3" /: storageName /: key =>
         req.decode[Multipart[F]] { m =>

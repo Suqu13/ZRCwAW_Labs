@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 import {
   Container, createTheme, ThemeProvider, Paper,
 } from '@mui/material';
-import { ObjectStorages } from './pages/ObjectStorages';
+import { ObjectStorageList } from './pages/ObjectStorageList';
 
 const App = (): JSX.Element => {
   const theme = createTheme();
@@ -35,7 +35,7 @@ const App = (): JSX.Element => {
             Object Storages
           </Typography>
           <Container sx={{ mt: 3 }}>
-            <ObjectStorages />
+            <ObjectStorageList />
           </Container>
         </Paper>
       </Container>
