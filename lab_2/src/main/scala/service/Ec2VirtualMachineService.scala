@@ -7,7 +7,7 @@ import cats.{Applicative, Functor}
 import domain.VirtualMachine
 import service.spi.VirtualMachineService
 import software.amazon.awssdk.services.ec2.Ec2Client
-import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest
+import software.amazon.awssdk.services.ec2.model.{DescribeInstancesRequest, StartInstancesRequest, StopInstancesRequest}
 
 import scala.jdk.CollectionConverters.ListHasAsScala
 
@@ -24,6 +24,18 @@ class Ec2VirtualMachineService[F[_] : Functor : Async : Console : Applicative](e
       .toVector
 
     Sync[F].blocking(instances)
+  }
+
+  override def startMachine(machineId: String): F[String] = {
+    val request = StartInstancesRequest.builder.instanceIds(machineId).build
+    ec2Client.startInstances(request)
+    Sync[F].blocking(s"Successfully started instance $machineId")
+  }
+
+  override def stopMachine(machineId: String): F[String] = {
+    val request = StopInstancesRequest.builder.instanceIds(machineId).build
+    ec2Client.stopInstances(request)
+    Sync[F].blocking(s"Successfully stopped instance $machineId")
   }
 }
 

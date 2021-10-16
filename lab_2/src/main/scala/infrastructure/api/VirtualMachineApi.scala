@@ -19,6 +19,10 @@ class VirtualMachineApi[F[_] : Monad : Async](virtualMachineService: VirtualMach
     HttpRoutes.of[F] {
       case GET -> Root / "ec2" =>
         virtualMachineService.getMachines.flatMap(Ok(_))
+      case GET -> Root / "ec2" / machineId / "start" =>
+        virtualMachineService.startMachine(machineId).flatMap(Ok(_))
+      case GET -> Root / "ec2" / machineId / "stop" =>
+        virtualMachineService.stopMachine(machineId).flatMap(Ok(_))
     }
   }
 }
