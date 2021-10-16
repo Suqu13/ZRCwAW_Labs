@@ -25,8 +25,8 @@ object Main extends IOApp {
         val ec2Service = Ec2VirtualMachineService[IO](ec2Client)
         val ec2Api = new VirtualMachineApi[IO](ec2Service)
 
-//        val routes = app(s3Api) //TODO merge ec2 and s3 routes
-        val routes = app(ec2Api)
+        val mergedApiRoutes = s3Api.routes <+> ec2Api.routes
+        val routes = app(mergedApiRoutes)
 
         HttpServer[IO](config.httpServer.host, config.httpServer.port, routes)
           .useForever
@@ -35,8 +35,8 @@ object Main extends IOApp {
 
   } yield server
 
-  def app[F[_] : Monad](apiRoutes: HttpApi[F]*): HttpApp[F] =
+  def app[F[_] : Monad](apiRoutes: HttpRoutes[F]*): HttpApp[F] =
     Router(
-      "/api/v1" -> apiRoutes.map(_.routes).foldLeft(HttpRoutes.empty[F])(_ <+> _)
+      "/api/v1" -> apiRoutes.foldLeft(HttpRoutes.empty[F])(_ <+> _)
     ).orNotFound
 }
