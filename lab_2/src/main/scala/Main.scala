@@ -1,13 +1,13 @@
 import cats.Monad
 import cats.effect.{ExitCode, IO, IOApp}
 import cats.syntax.semigroupk._
-import infrastructure.api.ObjectStorageApi
-import infrastructure.aws.{AwsS3AsyncClient, AwsS3Client}
+import infrastructure.api.{ObjectStorageApi, VirtualMachineApi}
+import infrastructure.aws.{AwsEc2Client, AwsS3AsyncClient, AwsS3Client}
 import infrastructure.configuration.Config
 import infrastructure.http.{HttpApi, HttpServer}
 import org.http4s.server.Router
 import org.http4s.{HttpApp, HttpRoutes}
-import service.S3ObjectStorageService
+import service.{Ec2VirtualMachineService, S3ObjectStorageService}
 
 object Main extends IOApp {
 
@@ -16,12 +16,17 @@ object Main extends IOApp {
     server <- (for {
       s3Client <- AwsS3Client[IO](config.aws)
       s3AsyncClient <- AwsS3AsyncClient[IO](config.aws)
-    } yield (s3Client, s3AsyncClient)) use {
-      case (s3Client, s3AsyncClient) =>
+      ec2Client <- AwsEc2Client[IO](config.aws)
+    } yield (s3Client, s3AsyncClient, ec2Client)) use {
+      case (s3Client, s3AsyncClient, ec2Client) =>
         val s3Service = S3ObjectStorageService[IO](s3Client, s3AsyncClient)
         val s3Api = new ObjectStorageApi[IO](s3Service)
 
-        val routes = app(s3Api)
+        val ec2Service = Ec2VirtualMachineService[IO](ec2Client)
+        val ec2Api = new VirtualMachineApi[IO](ec2Service)
+
+//        val routes = app(s3Api) //TODO merge ec2 and s3 routes
+        val routes = app(ec2Api)
 
         HttpServer[IO](config.httpServer.host, config.httpServer.port, routes)
           .useForever
