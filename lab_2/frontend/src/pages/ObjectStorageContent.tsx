@@ -5,8 +5,9 @@ import {
   IconButton, List, ListItem, ListItemText, Typography,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { saveAs } from 'file-saver';
-import { downloadFile, getObjectStorageItems } from '../api/object-storage-api';
+import { deleteObjectStorageItem, downloadFile, getObjectStorageItems } from '../api/object-storage-api';
 import { ObjectStorageItem } from '../api/model';
 
 const objectStorageItemsHook = (storageName: string): {
@@ -45,6 +46,12 @@ const downloadAndSaveFile = (storageName: string, objectKey: string): Promise<vo
   const fileName = objectKey.split('/').pop();
   return downloadFile(storageName, objectKey).then((blob) => saveAs(blob, fileName ?? objectKey));
 };
+
+const deleteFile = (
+  storageName: string,
+  objectKey: string,
+  refetch: () => void,
+): Promise<void> => deleteObjectStorageItem(storageName, objectKey).then(() => refetch());
 
 interface Props {
   objectStorageName: string
@@ -101,6 +108,11 @@ const ObjectStorageContent: FunctionComponent<Props> = ({ objectStorageName }) =
               </IconButton>
             )}
           >
+            <IconButton
+              onClick={() => deleteFile(objectStorageName, item.key, fetchObjectStorageItems)}
+            >
+              <DeleteIcon />
+            </IconButton>
             <ListItemText primary={item.key} />
           </ListItem>
         ))}
