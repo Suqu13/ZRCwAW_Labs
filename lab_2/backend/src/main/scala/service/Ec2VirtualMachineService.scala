@@ -26,16 +26,32 @@ class Ec2VirtualMachineService[F[_] : Functor : Async : Console : Applicative](e
     Sync[F].blocking(instances)
   }
 
+
+  override def getMachine(machineId: String): F[VirtualMachine] = {
+    val maxResults = 100
+    val nextToken: String = null
+    val request = DescribeInstancesRequest.builder.maxResults(maxResults).nextToken(nextToken).build
+    val response = ec2Client.describeInstances(request)
+
+    val instance = response.reservations.asScala
+      .flatMap(reservation => reservation.instances().asScala)
+      .map(instance => VirtualMachine(instance.instanceId, instance.state.name.toString))
+      .filter(instance => instance.instanceId.equals(machineId))
+      .head
+
+    Sync[F].blocking(instance)
+  }
+
   override def startMachine(machineId: String): F[String] = {
     val request = StartInstancesRequest.builder.instanceIds(machineId).build
-    ec2Client.startInstances(request)
-    Sync[F].blocking(s"Successfully started instance $machineId")
+    val resp = ec2Client.startInstances(request)
+    Sync[F].blocking(resp.startingInstances().asScala.head.currentState().name().toString)
   }
 
   override def stopMachine(machineId: String): F[String] = {
     val request = StopInstancesRequest.builder.instanceIds(machineId).build
-    ec2Client.stopInstances(request)
-    Sync[F].blocking(s"Successfully stopped instance $machineId")
+    val resp = ec2Client.stopInstances(request)
+    Sync[F].blocking(resp.stoppingInstances().asScala.head.currentState().name().toString)
   }
 }
 

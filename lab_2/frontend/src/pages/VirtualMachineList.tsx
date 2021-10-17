@@ -4,9 +4,11 @@ import {
   CircularProgress,
   Grid,
   Button,
+  List,
 } from '@mui/material';
 import { getVirtualMachines } from '../api/virtual-machine-api';
 import { VirtualMachine } from '../api/model';
+import { VirtualMachineItem } from './VirtualMachineItem';
 
 const virtualMachinesHook = (): {
   virtualMachines: Array<VirtualMachine>,
@@ -82,9 +84,9 @@ const VirtualMachineList = (): JSX.Element => {
   return (
     <>
       {virtualMachines.map((virtualMachine) => (
-        <Typography>
-          {virtualMachine.instanceId}
-        </Typography>
+        <List>
+          <VirtualMachineItem injectedVirtualMachine={virtualMachine} />
+        </List>
       ))}
     </>
   );
