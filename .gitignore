@@ -3,7 +3,7 @@
 .bsp
 
 # metals
-project/metals.sbt
+metals.sbt
 .metals
 
 # vs code
@@ -43,3 +43,21 @@ bin/
 
 #general
 *.class
+
+#node
+node_modules
+
+#build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+#vs-code
+.vs

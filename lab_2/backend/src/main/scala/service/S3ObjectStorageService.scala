@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.s3.model._
 import software.amazon.awssdk.services.s3.{S3AsyncClient, S3Client}
 
 import java.io.InputStream
+import java.lang
 import scala.jdk.CollectionConverters._
 
 class S3ObjectStorageService[F[_] : Functor : Async : Console : Applicative](s3Client: S3Client, s3AsyncClient: S3AsyncClient) extends ObjectStorageService[F] {
@@ -30,6 +31,11 @@ class S3ObjectStorageService[F[_] : Functor : Async : Console : Applicative](s3C
     Sync[F].blocking(s3Client.getObjectAsBytes(
       GetObjectRequest.builder().bucket(storageName).key(objectKey).build(),
     )).map(_.asInputStream()).attemptT
+
+  def deleteObject(storageName: String, objectKey: String): EitherT[F, Throwable, Int] =
+    Sync[F].blocking(s3Client.deleteObject(
+      DeleteObjectRequest.builder().bucket(storageName).key(objectKey).build()
+    )).map(_.sdkHttpResponse().statusCode()).attemptT
 
   override def uploadObject(storageName: String, objectKey: String, `object`: Stream[F, Byte]): EitherT[F, Throwable, StoredObject] =
     (for {

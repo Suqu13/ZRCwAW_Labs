@@ -19,5 +19,7 @@ trait ObjectStorageService[F[_]] {
 
   def downloadObject(storageName: String, objectKey: String): EitherT[F, Throwable, InputStream]
 
+  def deleteObject(storageName: String, objectKey: String): EitherT[F, Throwable, Int]
+
   def uploadObject(storageName: String, objectKey: String, `object`: Stream[F, Byte]): EitherT[F, Throwable, StoredObject]
 }
