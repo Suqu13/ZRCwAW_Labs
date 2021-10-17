@@ -25,8 +25,7 @@ object Main extends IOApp {
         val ec2Service = Ec2VirtualMachineService[IO](ec2Client)
         val ec2Api = new VirtualMachineApi[IO](ec2Service)
 
-        val mergedApiRoutes = s3Api.routes <+> ec2Api.routes
-        val routes = app(mergedApiRoutes)
+        val routes = app(s3Api.routes, ec2Api.routes)
 
         HttpServer[IO](config.httpServer.host, config.httpServer.port, routes)
           .useForever
