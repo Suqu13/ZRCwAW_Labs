@@ -7,6 +7,7 @@ import {
   Container, createTheme, ThemeProvider, Paper,
 } from '@mui/material';
 import { ObjectStorageList } from './pages/ObjectStorageList';
+import { VirtualMachineList } from './pages/VirtualMachineList';
 
 const App = (): JSX.Element => {
   const theme = createTheme();
@@ -36,6 +37,12 @@ const App = (): JSX.Element => {
           </Typography>
           <Container sx={{ mt: 3 }}>
             <ObjectStorageList />
+          </Container>
+          <Typography component="h1" variant="h4" align="center" sx={{ mt: 3 }}>
+            Virtual machines
+          </Typography>
+          <Container sx={{ mt: 3 }}>
+            <VirtualMachineList />
           </Container>
         </Paper>
       </Container>
