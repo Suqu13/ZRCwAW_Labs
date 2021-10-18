@@ -1,4 +1,4 @@
-package service.spi
+package domain.spi
 
 import domain.VirtualMachine
 

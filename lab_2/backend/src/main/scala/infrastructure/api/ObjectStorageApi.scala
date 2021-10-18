@@ -10,7 +10,7 @@ import org.http4s.{HttpRoutes, Response, Status}
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl._
 import org.http4s.multipart.Multipart
-import service.spi.ObjectStorageService
+import domain.spi.ObjectStorageService
 
 class ObjectStorageApi[F[_]: Monad : Async](objectStorageService: ObjectStorageService[F]) extends HttpApi[F] {
 

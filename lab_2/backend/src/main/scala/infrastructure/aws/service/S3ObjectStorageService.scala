@@ -1,19 +1,18 @@
-package service
+package infrastructure.aws.service
 
 import cats.data.EitherT
 import cats.effect.std.Console
 import cats.effect.{Async, Sync}
 import cats.syntax.all._
 import cats.{Applicative, Functor}
+import domain.spi.ObjectStorageService
 import domain.{ObjectStorage, StoredObject}
 import fs2.{Chunk, Stream}
-import service.spi.ObjectStorageService
 import software.amazon.awssdk.core.async.AsyncRequestBody
 import software.amazon.awssdk.services.s3.model._
 import software.amazon.awssdk.services.s3.{S3AsyncClient, S3Client}
 
 import java.io.InputStream
-import java.lang
 import scala.jdk.CollectionConverters._
 
 class S3ObjectStorageService[F[_] : Functor : Async : Console : Applicative](s3Client: S3Client, s3AsyncClient: S3AsyncClient) extends ObjectStorageService[F] {
