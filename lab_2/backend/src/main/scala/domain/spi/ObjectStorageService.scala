@@ -1,4 +1,4 @@
-package service.spi
+package domain.spi
 
 import cats.data.{EitherT, OptionT}
 import cats.effect.IO

@@ -1,13 +1,12 @@
-package infrastructure.aws
+package infrastructure.aws.client
 
 import cats.effect.std.Console
 import cats.effect.{Resource, Sync}
-import cats.implicits.catsSyntaxApplicativeError
 import infrastructure.configuration.AwsConfig
 import software.amazon.awssdk.auth.credentials.{AwsSessionCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.ec2.Ec2Client
-
+import cats.syntax.all._
 
 object AwsEc2Client {
   def apply[F[_] : Sync : Console](awsConfig: AwsConfig): Resource[F, Ec2Client] =

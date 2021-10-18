@@ -8,7 +8,7 @@ import io.circe.generic.auto._
 import org.http4s.HttpRoutes
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl._
-import service.spi.VirtualMachineService
+import domain.spi.VirtualMachineService
 
 class VirtualMachineApi[F[_] : Monad : Async](virtualMachineService: VirtualMachineService[F]) extends HttpApi[F] {
 

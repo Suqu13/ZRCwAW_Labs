@@ -13,6 +13,7 @@ val circeVersion = "0.14.1"
 libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "s3" % "2.17.57",
   "software.amazon.awssdk" % "ec2" % "2.17.57",
+  "software.amazon.awssdk" % "comprehend" % "2.17.57",
   "org.typelevel" %% "cats-effect" % "3.2.9" withSources() withJavadoc(),
   "org.http4s" %% "http4s-dsl" % http4sVersion,
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,

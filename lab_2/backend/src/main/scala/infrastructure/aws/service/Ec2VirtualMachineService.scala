@@ -1,11 +1,11 @@
-package service
+package infrastructure.aws.service
 
 import cats.effect.Async
 import cats.effect.kernel.Sync
 import cats.effect.std.Console
 import cats.{Applicative, Functor}
 import domain.VirtualMachine
-import service.spi.VirtualMachineService
+import domain.spi.VirtualMachineService
 import software.amazon.awssdk.services.ec2.Ec2Client
 import software.amazon.awssdk.services.ec2.model.{DescribeInstancesRequest, StartInstancesRequest, StopInstancesRequest}
 
