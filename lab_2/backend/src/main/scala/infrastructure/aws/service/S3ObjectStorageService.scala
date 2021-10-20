@@ -6,7 +6,8 @@ import cats.effect.{Async, Sync}
 import cats.syntax.all._
 import cats.{Applicative, Functor}
 import domain.spi.ObjectStorageService
-import domain.{ObjectStorage, StoredObject}
+import domain.model.StoredObject
+import domain.model.{ObjectStorage, StoredObject}
 import fs2.{Chunk, Stream}
 import software.amazon.awssdk.core.async.AsyncRequestBody
 import software.amazon.awssdk.services.s3.model._

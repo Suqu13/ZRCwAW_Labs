@@ -6,7 +6,7 @@ import cats.effect.std.Console
 import cats.syntax.all._
 import cats.{Applicative, Functor}
 import domain.spi.{LanguageAnalysisError, LanguageAnalysisService}
-import domain.{DetectedLanguage, LanguageAnalysisResult, SentimentAnalysisResult, SentimentScore}
+import domain.model.{DetectedLanguage, LanguageAnalysisResult, SentimentAnalysisResult, SentimentScore}
 import software.amazon.awssdk.services.comprehend.ComprehendClient
 import software.amazon.awssdk.services.comprehend.model.{DetectDominantLanguageRequest, DetectSentimentRequest}
 

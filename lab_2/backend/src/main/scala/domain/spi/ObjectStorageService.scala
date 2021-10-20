@@ -2,7 +2,8 @@ package domain.spi
 
 import cats.data.{EitherT, OptionT}
 import cats.effect.IO
-import domain.{ObjectStorage, StoredObject}
+import domain.model.StoredObject
+import domain.model.{ObjectStorage, StoredObject}
 import fs2.{Chunk, Stream}
 
 import java.io.InputStream
