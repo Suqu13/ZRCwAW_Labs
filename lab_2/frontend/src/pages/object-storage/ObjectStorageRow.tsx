@@ -1,9 +1,10 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import {
   Box, Collapse, IconButton, TableCell, TableRow,
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import FileUpload from '@mui/icons-material/FileUpload';
 import { ObjectStorageItems } from './ObjectStorageItems';
 
 interface Props {
@@ -11,17 +12,18 @@ interface Props {
     id: string
     name: string
   }
+  onUploadClick: (file: File) => Promise<void>
 }
 
-const ObjectStorageRow: React.FunctionComponent<Props> = ({ row }) => {
-  const [open, setOpen] = React.useState(false);
+const ObjectStorageRow: React.FunctionComponent<Props> = ({ row, onUploadClick }) => {
+  const [open, setOpen] = useState(false);
+  const [uploadKey, setUploadKey] = useState<string>('');
 
   return (
     <>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell>
+      <TableRow>
+        <TableCell width="10%">
           <IconButton
-            aria-label="expand row"
             size="small"
             onClick={() => setOpen(!open)}
           >
@@ -31,12 +33,31 @@ const ObjectStorageRow: React.FunctionComponent<Props> = ({ row }) => {
         <TableCell component="th" scope="row">
           {row.name}
         </TableCell>
+        <TableCell width="10%">
+          <IconButton
+            size="small"
+            component="label"
+          >
+            <FileUpload />
+            <input
+              type="file"
+              hidden
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  onUploadClick(file)
+                    .then(() => setUploadKey(file.name));
+                }
+              }}
+            />
+          </IconButton>
+        </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-              <ObjectStorageItems objectStorageName={row.name} />
+              <ObjectStorageItems key={uploadKey} objectStorageName={row.name} />
             </Box>
           </Collapse>
         </TableCell>

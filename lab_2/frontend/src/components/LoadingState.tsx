@@ -7,6 +7,7 @@ const LoadingState: React.FunctionComponent = () => (
     direction="column"
     justifyContent="center"
     alignItems="center"
+    sx={{ mb: 2, mt: 2.5 }}
   >
     <CircularProgress />
     <Typography variant="h6">

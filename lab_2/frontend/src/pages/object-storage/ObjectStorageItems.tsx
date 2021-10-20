@@ -11,6 +11,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import { useSnackbar } from 'notistack';
+import { saveAs } from 'file-saver';
 import {
   deleteObjectStorageItem,
   downloadObjectStorageItem,
@@ -20,6 +21,7 @@ import { ObjectItem } from '../../api/model';
 import { ErrorState } from '../../components/ErrorState';
 import { LoadingState } from '../../components/LoadingState';
 import { ConfirmationDialog } from '../../components/ConfirmationDialog';
+import { EmptyState } from '../../components/EmptyState';
 
 const objectStorageItemsHook = (storageName: string): {
   objectStorageItems: Array<ObjectItem>,
@@ -131,6 +133,12 @@ const ObjectStorageItems: React.FunctionComponent<Props> = ({ objectStorageName 
     );
   }
 
+  if (objectStorageItems.length === 0) {
+    return (
+      <EmptyState onClick={fetchObjectStorageItems} />
+    );
+  }
+
   return (
     <>
       <Typography variant="h6" gutterBottom component="div">
@@ -139,7 +147,12 @@ const ObjectStorageItems: React.FunctionComponent<Props> = ({ objectStorageName 
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Name</TableCell>
+            <TableCell>
+              <b>
+                Name
+              </b>
+            </TableCell>
+            <TableCell />
             <TableCell />
           </TableRow>
         </TableHead>
@@ -149,13 +162,16 @@ const ObjectStorageItems: React.FunctionComponent<Props> = ({ objectStorageName 
               <TableCell>
                 {row.key}
               </TableCell>
-              <TableCell>
-                <IconButton onClick={() => openDeletion(row.key)}>
+              <TableCell width="10%">
+                <IconButton size="small" onClick={() => openDeletion(row.key)}>
                   <DeleteIcon />
                 </IconButton>
               </TableCell>
-              <TableCell>
-                <IconButton onClick={() => openDownloading(row.key)}>
+              <TableCell width="10%">
+                <IconButton
+                  size="small"
+                  onClick={() => openDownloading(row.key)}
+                >
                   <DownloadIcon />
                 </IconButton>
               </TableCell>
@@ -179,10 +195,10 @@ const ObjectStorageItems: React.FunctionComponent<Props> = ({ objectStorageName 
         message="Are you sure that you want to download file?"
         open={openDownloadingDialog}
         onClose={() => setOpenDownloadingDialog(false)}
-        onCancelClick={() => setOpenDeletionDialog(false)}
+        onCancelClick={() => setOpenDownloadingDialog(false)}
         onConfirmClick={() => {
           if (selectedObjectItemKey) { downloadObjectItem(selectedObjectItemKey); }
-          setOpenDeletionDialog(false);
+          setOpenDownloadingDialog(false);
         }}
       />
     </>

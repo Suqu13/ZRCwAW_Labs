@@ -5,22 +5,21 @@ interface Props {
   onClick: () => void
 }
 
-const ErrorState: React.FunctionComponent<Props> = ({ onClick }) => (
+const EmptyState: React.FunctionComponent<Props> = ({ onClick }) => (
   <Grid
     container
     direction="column"
     justifyContent="center"
     alignItems="center"
     sx={{ mb: 2.5, mt: 2 }}
-
   >
     <Typography variant="h6" gutterBottom>
-      Unlucky, some error occured!
+      There is no data to display!
     </Typography>
-    <Button variant="outlined" color="error" onClick={onClick}>
+    <Button variant="outlined" color="info" onClick={onClick}>
       Reload
     </Button>
   </Grid>
 );
 
-export { ErrorState };
+export { EmptyState };

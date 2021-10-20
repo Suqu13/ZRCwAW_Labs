@@ -7,6 +7,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  TableContainer,
 } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { getObjectStorages, uploadFile } from '../../api/object-storage-api';
@@ -14,13 +15,14 @@ import { ObjectStorage } from '../../api/model';
 import { ObjectStorageRow } from './ObjectStorageRow';
 import { LoadingState } from '../../components/LoadingState';
 import { ErrorState } from '../../components/ErrorState';
+import { EmptyState } from '../../components/EmptyState';
 
 const objectStoragesHook = (): {
   objectsStorages: Array<ObjectStorage>,
   loading: boolean,
   error: boolean,
   fetchObjectStorages: () => void
-  uploadObject: (e: React.ChangeEvent<HTMLInputElement>, objectStorageName: string) => void,
+  uploadObjectItem: (file: File, objectStorageName: string) => Promise<void>,
 } => {
   const [objectsStorages, setObjectsStorages] = useState<Array<ObjectStorage>>([]);
   const [loading, setLoading] = useState(true);
@@ -41,31 +43,28 @@ const objectStoragesHook = (): {
     fetchObjectStorages();
   }, []);
 
-  const uploadObject = (
-    e: React.ChangeEvent<HTMLInputElement>,
+  const uploadObjectItem = (
+    file: File,
     objectStorageName: string,
-  ): void => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append('File', file);
-      enqueueSnackbar(
-        `Uploading ${file.name} file to ${objectStorageName} started!`,
-        { variant: 'info' },
-      );
-      uploadFile(formData, objectStorageName, file.name)
-        .then(() => {
-          enqueueSnackbar(
-            `Uploading ${file.name} file to ${objectStorageName} completed succesfully!`,
-            { variant: 'success' },
-          );
-        }).catch(() => {
-          enqueueSnackbar(
-            `Uploading ${file.name} file to ${objectStorageName} completed unsuccesfully!`,
-            { variant: 'error' },
-          );
-        });
-    }
+  ): Promise<void> => {
+    const formData = new FormData();
+    formData.append('File', file);
+    enqueueSnackbar(
+      `Uploading ${file.name} file to ${objectStorageName} started!`,
+      { variant: 'info' },
+    );
+    return uploadFile(formData, objectStorageName, file.name)
+      .then(() => {
+        enqueueSnackbar(
+          `Uploading ${file.name} file to ${objectStorageName} completed succesfully!`,
+          { variant: 'success' },
+        );
+      }).catch(() => {
+        enqueueSnackbar(
+          `Uploading ${file.name} file to ${objectStorageName} completed unsuccesfully!`,
+          { variant: 'error' },
+        );
+      });
   };
 
   return {
@@ -73,7 +72,7 @@ const objectStoragesHook = (): {
     loading,
     error,
     fetchObjectStorages,
-    uploadObject,
+    uploadObjectItem,
   };
 };
 
@@ -83,7 +82,7 @@ const ObjectStorageTable: React.FunctionComponent = () => {
     loading,
     error,
     fetchObjectStorages,
-    // uploadObject,
+    uploadObjectItem,
   } = objectStoragesHook();
 
   const content = (): JSX.Element => {
@@ -97,16 +96,26 @@ const ObjectStorageTable: React.FunctionComponent = () => {
         <LoadingState />
       );
     }
+    if (objectsStorages.length === 0) {
+      return (
+        <EmptyState onClick={fetchObjectStorages} />
+      );
+    }
     return (
       <>
         <Typography component="h2" variant="h6" color="primary" gutterBottom>
-          S3
+          S3 - Simple Cloud Strorage
         </Typography>
         <Table size="small">
           <TableHead>
             <TableRow>
               <TableCell />
-              <TableCell>Name</TableCell>
+              <TableCell>
+                <b>
+                  Name
+                </b>
+              </TableCell>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -114,6 +123,9 @@ const ObjectStorageTable: React.FunctionComponent = () => {
               <ObjectStorageRow
                 key={row.name}
                 row={{ id: row.name, name: row.name }}
+                onUploadClick={
+                  (file: File) => uploadObjectItem(file, row.name)
+                }
               />
             ))}
           </TableBody>
@@ -125,7 +137,9 @@ const ObjectStorageTable: React.FunctionComponent = () => {
   return (
     <>
       <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-        {content()}
+        <TableContainer>
+          {content()}
+        </TableContainer>
       </Paper>
     </>
   );
