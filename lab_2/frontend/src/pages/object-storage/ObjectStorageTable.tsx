@@ -39,7 +39,7 @@ const objectStoragesHook = (): {
 
   useEffect((): void => {
     fetchObjectStorages();
-  });
+  }, []);
 
   const uploadObject = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -105,6 +105,7 @@ const ObjectStorageTable: React.FunctionComponent = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
+              <TableCell />
               <TableCell>Name</TableCell>
             </TableRow>
           </TableHead>
@@ -124,7 +125,7 @@ const ObjectStorageTable: React.FunctionComponent = () => {
   return (
     <>
       <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-        {content}
+        {content()}
       </Paper>
     </>
   );

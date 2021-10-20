@@ -32,7 +32,7 @@ const virtualMachinesHook = (): {
 
   useEffect((): void => {
     fetchVirtualMachines();
-  });
+  }, []);
 
   return {
     virtualMachines,

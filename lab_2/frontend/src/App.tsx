@@ -14,7 +14,7 @@ import {
   Route,
 } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
-import { VirtualMachineList } from './pages/virtual-machine/VirtualMachineList';
+// import { VirtualMachineList } from './pages/virtual-machine/VirtualMachineList';
 import { ObjectStorageTable } from './pages/object-storage/ObjectStorageTable';
 
 const App = (): JSX.Element => {
@@ -83,7 +83,7 @@ const App = (): JSX.Element => {
                 Virtual machines
               </Typography>
               <Container sx={{ mt: 3 }}>
-                <VirtualMachineList />
+                {/* <VirtualMachineList /> */}
               </Container>
             </Paper>
           </Container>

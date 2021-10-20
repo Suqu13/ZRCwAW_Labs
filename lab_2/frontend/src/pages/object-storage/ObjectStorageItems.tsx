@@ -79,7 +79,7 @@ const objectStorageItemsHook = (storageName: string): {
 
   useEffect((): void => {
     fetchObjectStorageItems();
-  });
+  }, []);
 
   return {
     objectStorageItems,
