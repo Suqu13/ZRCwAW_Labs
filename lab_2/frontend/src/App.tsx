@@ -4,18 +4,14 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import {
-  Container, createTheme,
-  ThemeProvider, Paper, GlobalStyles, Link,
+  Container, createTheme, GlobalStyles, Link, ThemeProvider,
 } from '@mui/material';
 import {
-  BrowserRouter as Router,
-  Link as RouterLink,
-  Switch,
-  Route,
+  BrowserRouter as Router, Link as RouterLink, Route, Switch,
 } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
-// import { VirtualMachineList } from './pages/virtual-machine/VirtualMachineList';
 import { ObjectStorageTable } from './pages/object-storage/ObjectStorageTable';
+import { LanguageAnalysisPage } from './pages/language-analysis/LanguageAnalysisPage';
 
 const App = (): JSX.Element => {
   const theme = createTheme();
@@ -32,7 +28,6 @@ const App = (): JSX.Element => {
         />
         <CssBaseline />
         <Router>
-
           <AppBar
             position="static"
             color="default"
@@ -62,6 +57,15 @@ const App = (): JSX.Element => {
                 >
                   EC2
                 </Link>
+                <Link
+                  component={RouterLink}
+                  variant="button"
+                  color="text.primary"
+                  to="comprehend"
+                  sx={{ my: 1, mx: 1.5 }}
+                >
+                  Comprehend
+                </Link>
               </nav>
             </Toolbar>
           </AppBar>
@@ -74,18 +78,10 @@ const App = (): JSX.Element => {
               <Route exact path="/ec2">
                 <p>ec2</p>
               </Route>
+              <Route exact path="/comprehend">
+                <LanguageAnalysisPage />
+              </Route>
             </Switch>
-            <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-              <Typography component="h1" variant="h4" align="center">
-                Object Storages
-              </Typography>
-              <Typography component="h1" variant="h4" align="center" sx={{ mt: 3 }}>
-                Virtual machines
-              </Typography>
-              <Container sx={{ mt: 3 }}>
-                {/* <VirtualMachineList /> */}
-              </Container>
-            </Paper>
           </Container>
         </Router>
       </ThemeProvider>
