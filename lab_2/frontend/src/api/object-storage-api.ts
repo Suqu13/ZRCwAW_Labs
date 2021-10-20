@@ -1,10 +1,10 @@
-import { ObjectStorage, ObjectStorageItem } from './model';
+import { ObjectStorage, ObjectItem } from './model';
 
 function getObjectStorages(): Promise<Array<ObjectStorage>> {
   return fetch('/api/v1/s3').then((response) => response.json());
 }
 
-function getObjectStorageItems(storageName: string): Promise<Array<ObjectStorageItem>> {
+function getObjectStorageItems(storageName: string): Promise<Array<ObjectItem>> {
   return fetch(`/api/v1/s3/${storageName}`).then((response) => response.json());
 }
 
@@ -13,7 +13,7 @@ function deleteObjectStorageItem(storageName: string, objectKey: string): Promis
     .then((response) => response.status >= 200 && response.status < 300);
 }
 
-function downloadFile(storageName: string, objectKey: string): Promise<Blob> {
+function downloadObjectStorageItem(storageName: string, objectKey: string): Promise<Blob> {
   return fetch(`/api/v1/s3/${storageName}/${objectKey}`).then((response) => response.blob());
 }
 
@@ -21,7 +21,7 @@ function uploadFile(
   formData: FormData,
   storageName: string,
   objectKey: string,
-): Promise<ObjectStorageItem> {
+): Promise<ObjectItem> {
   return fetch(`/api/v1/s3/${storageName}/${objectKey}`,
     {
       method: 'POST',
@@ -30,5 +30,9 @@ function uploadFile(
 }
 
 export {
-  getObjectStorages, getObjectStorageItems, downloadFile, uploadFile, deleteObjectStorageItem,
+  getObjectStorages,
+  getObjectStorageItems,
+  downloadObjectStorageItem,
+  uploadFile,
+  deleteObjectStorageItem,
 };

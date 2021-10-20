@@ -5,8 +5,8 @@ import {
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { VirtualMachine } from '../api/model';
-import { getVirtualMachine, startVirtualMachine, stopVirtualMachine } from '../api/virtual-machine-api';
+import { VirtualMachine } from '../../api/model';
+import { getVirtualMachine, startVirtualMachine, stopVirtualMachine } from '../../api/virtual-machine-api';
 
 const virtualMachineItemHook = (injectedVirtualMachine: VirtualMachine): {
   virtualMachine: VirtualMachine,

@@ -6,8 +6,8 @@ import {
   Button,
   List,
 } from '@mui/material';
-import { getVirtualMachines } from '../api/virtual-machine-api';
-import { VirtualMachine } from '../api/model';
+import { getVirtualMachines } from '../../api/virtual-machine-api';
+import { VirtualMachine } from '../../api/model';
 import { VirtualMachineItem } from './VirtualMachineItem';
 
 const virtualMachinesHook = (): {
@@ -32,7 +32,7 @@ const virtualMachinesHook = (): {
 
   useEffect((): void => {
     fetchVirtualMachines();
-  }, []);
+  });
 
   return {
     virtualMachines,
