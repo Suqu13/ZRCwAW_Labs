@@ -47,10 +47,6 @@ const objectStorageItemsHook = (storageName: string): {
   };
 
   const deleteObjectItem = (objectItemKey: string): void => {
-    enqueueSnackbar(
-      `Deleting the object with ${objectItemKey} key from ${storageName} started!`,
-      { variant: 'info' },
-    );
     deleteObjectStorageItem(storageName, objectItemKey)
       .then(() => {
         enqueueSnackbar(
@@ -67,10 +63,6 @@ const objectStorageItemsHook = (storageName: string): {
 
   const downloadObjectItem = (objectItemKey: string): void => {
     const fileName = objectItemKey.split('/').pop() ?? objectItemKey;
-    enqueueSnackbar(
-      `Downloading the object with ${fileName} key from ${storageName} started!`,
-      { variant: 'info' },
-    );
     downloadObjectStorageItem(storageName, objectItemKey)
       .then((blob) => saveAs(blob, fileName))
       .catch(() => enqueueSnackbar(

@@ -4,14 +4,23 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import {
-  Container, createTheme, GlobalStyles, Link, ThemeProvider,
+  Container,
+  createTheme,
+  GlobalStyles,
+  Link,
+  ThemeProvider,
 } from '@mui/material';
 import {
-  BrowserRouter as Router, Link as RouterLink, Route, Switch,
+  BrowserRouter as Router,
+  Link as RouterLink,
+  Route,
+  Redirect,
+  Switch,
 } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 import { ObjectStorageTable } from './pages/object-storage/ObjectStorageTable';
 import { LanguageAnalysisPage } from './pages/language-analysis/LanguageAnalysisPage';
+import { VirtualMachineTable } from './pages/virtual-machine/VirtualMachineTable';
 
 const App = (): JSX.Element => {
   const theme = createTheme();
@@ -72,13 +81,16 @@ const App = (): JSX.Element => {
 
           <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
             <Switch>
+              <Route exact path="/">
+                <Redirect to="/s3" />
+              </Route>
               <Route path="/s3">
                 <ObjectStorageTable />
               </Route>
-              <Route exact path="/ec2">
-                <p>ec2</p>
+              <Route path="/ec2">
+                <VirtualMachineTable />
               </Route>
-              <Route exact path="/comprehend">
+              <Route path="/comprehend">
                 <LanguageAnalysisPage />
               </Route>
             </Switch>

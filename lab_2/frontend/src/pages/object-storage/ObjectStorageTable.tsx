@@ -49,10 +49,6 @@ const objectStoragesHook = (): {
   ): Promise<void> => {
     const formData = new FormData();
     formData.append('File', file);
-    enqueueSnackbar(
-      `Uploading ${file.name} file to ${objectStorageName} started!`,
-      { variant: 'info' },
-    );
     return uploadFile(formData, objectStorageName, file.name)
       .then(() => {
         enqueueSnackbar(
@@ -102,9 +98,9 @@ const ObjectStorageTable: React.FunctionComponent = () => {
       );
     }
     return (
-      <>
+      <TableContainer>
         <Typography component="h2" variant="h6" color="primary" gutterBottom>
-          S3 - Simple Cloud Strorage
+          S3 - Simple Strorage Service
         </Typography>
         <Table size="small">
           <TableHead>
@@ -130,16 +126,14 @@ const ObjectStorageTable: React.FunctionComponent = () => {
             ))}
           </TableBody>
         </Table>
-      </>
+      </TableContainer>
     );
   };
 
   return (
     <>
       <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-        <TableContainer>
-          {content()}
-        </TableContainer>
+        {content()}
       </Paper>
     </>
   );

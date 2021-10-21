@@ -1,27 +1,72 @@
 import React, { useState } from 'react';
 import {
-  Box, Divider,
-  Paper, TextField, Typography,
+  Box,
+  Divider,
+  Paper,
+  TextField,
+  Typography,
 } from '@mui/material';
 import Button from '@mui/material/Button';
 import JSONPretty from 'react-json-pretty';
 import 'react-json-pretty/themes/monikai.css';
+import { useSnackbar } from 'notistack';
 import { languageAnalysis, sentimentAnalysis } from '../../api/language-analysis-api';
 
+const languageAnalyseHook = (): {
+  analyseLanguage: (text: string) => Promise<void>
+  analyseSentiment: (text: string) => Promise<void>
+  result?: string
+} => {
+  const [result, setResult] = useState<string>();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const analyseLanguage = (text: string): Promise<void> => languageAnalysis(text)
+    .then((res) => {
+      enqueueSnackbar(
+        'Language analyse completed succesfully!',
+        { variant: 'success' },
+      );
+      setResult(res);
+    })
+    .catch(() => {
+      enqueueSnackbar(
+        'Language analyse completed unsuccesfully!',
+        { variant: 'error' },
+      );
+    });
+
+  const analyseSentiment = (text: string): Promise<void> => sentimentAnalysis(text)
+    .then((res) => {
+      enqueueSnackbar(
+        'Sentiment analyse completed succesfully!',
+        { variant: 'success' },
+      );
+      setResult(res);
+    })
+    .catch(() => {
+      enqueueSnackbar(
+        'Sentiment analyse completed unsuccesfully!',
+        { variant: 'error' },
+      );
+    });
+
+  return {
+    analyseLanguage,
+    analyseSentiment,
+    result,
+  };
+};
+
 const LanguageAnalysisPage: React.FunctionComponent = () => {
-  const [text, setText] = useState<string>('Provide text in any language.');
-  const [result, setResult] = useState<string | undefined>(undefined);
+  const [text, setText] = useState('Provide text in any language.');
+  const {
+    analyseLanguage,
+    analyseSentiment,
+    result,
+  } = languageAnalyseHook();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setText(event.target.value);
-  };
-
-  const analyseLanguage = (): void => {
-    languageAnalysis(text).then((res) => setResult(res));
-  };
-
-  const analyseSentiment = (): void => {
-    sentimentAnalysis(text).then((res) => setResult(res));
   };
 
   const content = (): JSX.Element => (
@@ -39,8 +84,8 @@ const LanguageAnalysisPage: React.FunctionComponent = () => {
         fullWidth
       />
       <Box sx={{ margin: '8px 0 8px 0' }}>
-        <Button variant="outlined" sx={{ marginRight: '4px' }} onClick={analyseLanguage}>Language Analyis</Button>
-        <Button variant="outlined" onClick={analyseSentiment}>Sentiment Analysis</Button>
+        <Button variant="outlined" sx={{ marginRight: '4px' }} onClick={() => analyseLanguage(text)}>Language Analyis</Button>
+        <Button variant="outlined" onClick={() => analyseSentiment(text)}>Sentiment Analysis</Button>
       </Box>
       <Divider />
       <Typography component="h4" variant="h6" color="primary" gutterBottom>

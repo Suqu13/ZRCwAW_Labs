@@ -1,71 +1,126 @@
 import React, { FunctionComponent, useState } from 'react';
 import {
-  IconButton, ListItem, ListItemText,
+  IconButton,
+  TableCell,
+  TableRow,
 } from '@mui/material';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { useSnackbar } from 'notistack';
 import { VirtualMachine } from '../../api/model';
-import { getVirtualMachine, startVirtualMachine, stopVirtualMachine } from '../../api/virtual-machine-api';
+import {
+  getVirtualMachine,
+  startVirtualMachine,
+  stopVirtualMachine,
+} from '../../api/virtual-machine-api';
 
-const virtualMachineItemHook = (injectedVirtualMachine: VirtualMachine): {
+const virtualMachineItemHook = (initialVirtualMachine : VirtualMachine): {
   virtualMachine: VirtualMachine,
-  refetch: () => void
+  refresh: () => void
+  start: () => void
+  stop: () => void
 } => {
-  const [virtualMachine, setVirtualMachine] = useState<VirtualMachine>(injectedVirtualMachine);
+  const [virtualMachine, setVirtualMachine] = useState(initialVirtualMachine);
+  const { enqueueSnackbar } = useSnackbar();
 
-  const refetch = (): void => {
+  const refresh = (): void => {
     getVirtualMachine(virtualMachine.instanceId)
       .then((fetchedVirtualMachine) => {
         setVirtualMachine(fetchedVirtualMachine);
-      });
+        enqueueSnackbar(
+          `Refreshing ${virtualMachine.instanceId} EC2 completed succesfully!`,
+          { variant: 'success' },
+        );
+      })
+      .catch(() => enqueueSnackbar(
+        `Refreshing ${virtualMachine.instanceId} EC2 completed unsuccesfully!`,
+        { variant: 'error' },
+      ));
+  };
+
+  const start = (): void => {
+    startVirtualMachine(virtualMachine.instanceId)
+      .then(() => {
+        enqueueSnackbar(
+          `Starting ${virtualMachine.instanceId} EC2 completed succesfully!`,
+          { variant: 'success' },
+        );
+        refresh();
+      })
+      .catch(() => enqueueSnackbar(
+        `Starting ${virtualMachine.instanceId} EC2 completed unsuccesfully!`,
+        { variant: 'error' },
+      ));
+  };
+
+  const stop = (): void => {
+    stopVirtualMachine(virtualMachine.instanceId)
+      .then(() => {
+        enqueueSnackbar(
+          `Stopping ${virtualMachine.instanceId} EC2 completed succesfully!`,
+          { variant: 'success' },
+        );
+        refresh();
+      })
+      .catch(() => enqueueSnackbar(
+        `Stopping ${virtualMachine.instanceId} EC2 completed unsuccesfully!`,
+        { variant: 'error' },
+      ));
   };
 
   return {
     virtualMachine,
-    refetch,
+    refresh,
+    start,
+    stop,
   };
 };
 
 interface Props {
-  injectedVirtualMachine: VirtualMachine
+  row: VirtualMachine
 }
 
-const startMachine = (
-  virtualMachine: VirtualMachine,
-  refetch: () => void,
-): Promise<void> => startVirtualMachine(virtualMachine.instanceId)
-  .then(() => refetch());
-
-const stopMachine = (
-  virtualMachine: VirtualMachine,
-  refetch: () => void,
-): Promise<void> => stopVirtualMachine(virtualMachine.instanceId)
-  .then(() => refetch());
-
-const VirtualMachineItem: FunctionComponent<Props> = ({ injectedVirtualMachine }) => {
+const VirtualMachineItem: FunctionComponent<Props> = ({ row }) => {
   const {
     virtualMachine,
-    refetch,
-  } = virtualMachineItemHook(injectedVirtualMachine);
+    refresh,
+    start,
+    stop,
+  } = virtualMachineItemHook(row);
 
   return (
-    <>
-      <ListItem
-        key={virtualMachine.instanceId}
-      >
-        <ListItemText primary={virtualMachine.instanceId} secondary={virtualMachine.stateName} />
-        <IconButton onClick={() => refetch()}>
+    <TableRow>
+      <TableCell>
+        {virtualMachine.instanceId}
+      </TableCell>
+      <TableCell>
+        {virtualMachine.stateName}
+      </TableCell>
+      <TableCell width="10%">
+        <IconButton onClick={() => refresh()}>
           <RefreshIcon />
         </IconButton>
-        <IconButton onClick={() => startMachine(virtualMachine, refetch)}>
-          <PlayCircleFilledIcon />
+      </TableCell>
+      <TableCell width="10%">
+        <IconButton
+          size="small"
+        >
+          <IconButton onClick={() => start()}>
+            <PlayCircleFilledIcon />
+          </IconButton>
         </IconButton>
-        <IconButton onClick={() => stopMachine(virtualMachine, refetch)}>
-          <StopCircleIcon />
+      </TableCell>
+      <TableCell width="10%">
+        <IconButton
+          size="small"
+        >
+          <IconButton onClick={() => stop()}>
+            <StopCircleIcon />
+          </IconButton>
         </IconButton>
-      </ListItem>
-    </>
+      </TableCell>
+    </TableRow>
   );
 };
 
