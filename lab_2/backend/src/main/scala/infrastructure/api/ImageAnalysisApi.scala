@@ -17,8 +17,10 @@ class ImageAnalysisApi[F[_] : Monad : Async](imageAnalysisService: ImageAnalysis
     import dsl._
 
     HttpRoutes.of[F] {
-      case GET -> Root / "rekognition" / bucketName / imageName =>
+      case GET -> Root / "rekognition" / bucketName / imageName / "labels" =>
         imageAnalysisService.getLabels(bucketName, imageName).flatMap(Ok(_))
+      case GET -> Root / "rekognition" / bucketName / imageName / "text" =>
+        imageAnalysisService.getText(bucketName, imageName).flatMap(Ok(_))
     }
   }
 }

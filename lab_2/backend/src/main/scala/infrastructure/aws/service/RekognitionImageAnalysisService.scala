@@ -4,22 +4,17 @@ import cats.effect.Async
 import cats.effect.kernel.Sync
 import cats.effect.std.Console
 import cats.{Applicative, Functor}
-import domain.model.ImageLabel
+import domain.model.{ImageLabel, ImageText}
 import domain.spi.ImageAnalysisService
 import software.amazon.awssdk.services.rekognition.RekognitionClient
-import software.amazon.awssdk.services.rekognition.model.{DetectLabelsRequest, Image, S3Object}
+import software.amazon.awssdk.services.rekognition.model.{DetectLabelsRequest, DetectTextRequest, Image, S3Object}
 
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 class RekognitionImageAnalysisService[F[_] : Functor : Async : Console : Applicative](rekognitionClient: RekognitionClient) extends ImageAnalysisService[F] {
   override def getLabels(bucketName: String, imageName: String): F[Vector[ImageLabel]] = {
-    val s3Object = S3Object.builder()
-      .bucket(bucketName)
-      .name(imageName)
-      .build()
-    val myImage = Image.builder()
-      .s3Object(s3Object)
-      .build()
+    val myImage = getImage(bucketName, imageName)
+
     val detectLabelsRequest = DetectLabelsRequest.builder()
       .image(myImage)
       .maxLabels(10)
@@ -30,8 +25,32 @@ class RekognitionImageAnalysisService[F[_] : Functor : Async : Console : Applica
       .map(label => ImageLabel(label.name(), label.confidence()))
       .toVector
 
-    println(labels)
-
     Sync[F].blocking(labels)
+  }
+
+  override def getText(bucketName: String, imageName: String): F[Vector[ImageText]] = {
+    val myImage = getImage(bucketName, imageName)
+
+    val detectLabelsRequest = DetectTextRequest.builder()
+      .image(myImage)
+      .build()
+
+    val response = rekognitionClient.detectText(detectLabelsRequest)
+
+    val detections = response.textDetections().asScala
+      .map(detection => ImageText(detection.detectedText(), detection.confidence()))
+      .toVector
+
+    Sync[F].blocking(detections)
+  }
+
+  def getImage(bucketName: String, imageName: String): Image = {
+    val s3Object = S3Object.builder()
+      .bucket(bucketName)
+      .name(imageName)
+      .build()
+    Image.builder()
+      .s3Object(s3Object)
+      .build()
   }
 }
