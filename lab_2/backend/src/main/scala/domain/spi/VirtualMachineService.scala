@@ -1,6 +1,6 @@
 package domain.spi
 
-import domain.VirtualMachine
+import domain.model.VirtualMachine
 
 trait VirtualMachineService[F[_]] {
   def getMachines: F[Vector[VirtualMachine]]

@@ -1,4 +1,4 @@
-package domain
+package domain.model
 
 case class LanguageAnalysisResult(
   detectedLanguages: Vector[DetectedLanguage]

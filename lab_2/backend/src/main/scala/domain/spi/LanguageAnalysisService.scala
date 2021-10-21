@@ -1,7 +1,8 @@
 package domain.spi
 
 import cats.data.EitherT
-import domain.{LanguageAnalysisResult, SentimentAnalysisResult}
+import domain.model.SentimentAnalysisResult
+import domain.model.{LanguageAnalysisResult, SentimentAnalysisResult}
 
 case class LanguageAnalysisError(msg: String) extends Throwable(msg)
 

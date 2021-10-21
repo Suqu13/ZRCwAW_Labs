@@ -2,7 +2,7 @@ export interface ObjectStorage {
   name: string
 }
 
-export interface ObjectStorageItem {
+export interface ObjectItem {
   key: string
 }
 
