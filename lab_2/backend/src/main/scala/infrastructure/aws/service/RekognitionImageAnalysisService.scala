@@ -28,7 +28,7 @@ class RekognitionImageAnalysisService[F[_] : Functor : Async : Console : Applica
     Sync[F].blocking(labels)
   }
 
-  override def getText(bucketName: String, imageName: String): F[Vector[ImageText]] = {
+  override def getTexts(bucketName: String, imageName: String): F[Vector[ImageText]] = {
     val myImage = getImage(bucketName, imageName)
 
     val detectLabelsRequest = DetectTextRequest.builder()
@@ -37,11 +37,11 @@ class RekognitionImageAnalysisService[F[_] : Functor : Async : Console : Applica
 
     val response = rekognitionClient.detectText(detectLabelsRequest)
 
-    val detections = response.textDetections().asScala
+    val texts = response.textDetections().asScala
       .map(detection => ImageText(detection.detectedText(), detection.confidence()))
       .toVector
 
-    Sync[F].blocking(detections)
+    Sync[F].blocking(texts)
   }
 
   def getImage(bucketName: String, imageName: String): Image = {
