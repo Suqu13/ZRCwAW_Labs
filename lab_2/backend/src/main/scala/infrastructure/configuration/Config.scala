@@ -6,20 +6,20 @@ import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax.CatsEffectConfigSource
 
 case class HttpServerConfig(
-  host: String,
-  port: Int
-)
+                             host: String,
+                             port: Int
+                           )
 
-case class AwsConfig(
-  secretKeyId: String,
-  secretAccessKey: String,
-  sessionToken: String
-)
+case class AwsSdkConfig(
+                         secretKeyId: String,
+                         secretAccessKey: String,
+                         sessionToken: String
+                       )
 
 case class Config(
-  httpServer: HttpServerConfig,
-  aws: AwsConfig
-)
+                   httpServer: HttpServerConfig,
+                   awsSdk: AwsSdkConfig
+                 )
 
 object Config {
   def load[F[_] : Sync]: F[Config] =

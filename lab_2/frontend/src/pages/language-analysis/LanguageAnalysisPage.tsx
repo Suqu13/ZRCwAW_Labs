@@ -69,8 +69,8 @@ const LanguageAnalysisPage: React.FunctionComponent = () => {
     setText(event.target.value);
   };
 
-  const content = (): JSX.Element => (
-    <>
+  return (
+    <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
       <Typography component="h2" variant="h6" color="primary" gutterBottom>
         Comprehend - Language Analysis
       </Typography>
@@ -97,15 +97,7 @@ const LanguageAnalysisPage: React.FunctionComponent = () => {
       >
         <JSONPretty data={result} />
       </Box>
-    </>
-  );
-
-  return (
-    <>
-      <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-        {content()}
-      </Paper>
-    </>
+    </Paper>
   );
 };
 
