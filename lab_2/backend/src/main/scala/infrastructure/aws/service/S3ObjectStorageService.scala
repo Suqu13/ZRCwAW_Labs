@@ -1,13 +1,12 @@
 package infrastructure.aws.service
 
+import cats.Applicative
 import cats.data.EitherT
+import cats.effect.Async
 import cats.effect.std.Console
-import cats.effect.{Async, Sync}
 import cats.syntax.all._
-import cats.{Applicative, Functor}
-import domain.spi.ObjectStorageService
-import domain.model.StoredObject
 import domain.model.{ObjectStorage, StoredObject}
+import domain.spi.ObjectStorageService
 import fs2.{Chunk, Stream}
 import software.amazon.awssdk.core.async.AsyncRequestBody
 import software.amazon.awssdk.services.s3.model._
@@ -16,24 +15,24 @@ import software.amazon.awssdk.services.s3.{S3AsyncClient, S3Client}
 import java.io.InputStream
 import scala.jdk.CollectionConverters._
 
-class S3ObjectStorageService[F[_] : Functor : Async : Console : Applicative](s3Client: S3Client, s3AsyncClient: S3AsyncClient) extends ObjectStorageService[F] {
+class S3ObjectStorageService[F[_] : Async : Console](s3Client: S3Client, s3AsyncClient: S3AsyncClient) extends ObjectStorageService[F] {
 
   override def getStorages: F[Vector[ObjectStorage]] =
-    Sync[F].blocking(s3Client.listBuckets)
+    Async[F].blocking(s3Client.listBuckets)
       .map(_.buckets.asScala.toVector.map(b => ObjectStorage(b.name)))
 
   override def listStorage(storageName: String): EitherT[F, Throwable, Vector[StoredObject]] =
-    Sync[F].blocking(s3Client.listObjectsV2(
+    Async[F].blocking(s3Client.listObjectsV2(
       ListObjectsV2Request.builder().bucket(storageName).build()
     )).map(_.contents.asScala.toVector.map(s => StoredObject(s.key))).attemptT
 
   override def downloadObject(storageName: String, objectKey: String): EitherT[F, Throwable, InputStream] =
-    Sync[F].blocking(s3Client.getObjectAsBytes(
+    Async[F].blocking(s3Client.getObjectAsBytes(
       GetObjectRequest.builder().bucket(storageName).key(objectKey).build(),
     )).map(_.asInputStream()).attemptT
 
   def deleteObject(storageName: String, objectKey: String): EitherT[F, Throwable, Int] =
-    Sync[F].blocking(s3Client.deleteObject(
+    Async[F].blocking(s3Client.deleteObject(
       DeleteObjectRequest.builder().bucket(storageName).key(objectKey).build()
     )).map(_.sdkHttpResponse().statusCode()).attemptT
 
@@ -58,7 +57,7 @@ class S3ObjectStorageService[F[_] : Functor : Async : Console : Applicative](s3C
     parts.zipWithIndex.parEvalMapUnordered[F, CompletedPart](10) {
       case (part, index) =>
         for {
-          _ <- Applicative[F].unit
+          _ <- Async[F].unit
           uploadPartRequest = UploadPartRequest.builder()
             .bucket(storageName)
             .key(objectKey)
@@ -104,6 +103,6 @@ class S3ObjectStorageService[F[_] : Functor : Async : Console : Applicative](s3C
 }
 
 object S3ObjectStorageService {
-  def apply[F[_] : Functor : Async : Console](s3Client: S3Client, s3AsyncClient: S3AsyncClient): S3ObjectStorageService[F] =
+  def apply[F[_] : Async : Console](s3Client: S3Client, s3AsyncClient: S3AsyncClient): S3ObjectStorageService[F] =
     new S3ObjectStorageService(s3Client, s3AsyncClient)
 }

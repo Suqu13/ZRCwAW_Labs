@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  Typography, IconButton, Modal, Box,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  Table,
+  TableBody,
+  TableRow,
+  DialogContent,
+  TableCell,
+  TableHead,
+  Typography,
 } from '@mui/material';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
-import { getLabels, getTexts } from '../api/image-analysis-api';
+import { useSnackbar } from 'notistack';
+import { getLabels as getLabels_, getTexts as getTexts_ } from '../api/image-analysis-api';
+import { ImageLabel, ImageText } from '../api/model';
+import { LoadingState } from './LoadingState';
+import { EmptyState } from './EmptyState';
+import { ErrorState } from './ErrorState';
 
 interface Props {
   storageName: string
@@ -11,54 +25,47 @@ interface Props {
 }
 
 const AnalyseImage: React.FunctionComponent<Props> = ({ storageName, imageName }) => {
-  const [open, setOpen] = React.useState(false);
-  const [labelList, setlabelList] = React.useState(Array<JSX.Element>());
-  const labelListTemp: Array<JSX.Element> = [];
-  const [textList, setTextList] = React.useState(Array<JSX.Element>());
-  const textListTemp: Array<JSX.Element> = [];
+  const [open, setOpen] = useState(false);
+  const [labels, setLabels] = useState<ImageLabel[]>();
+  const [labelsLoading, setLabelsLoading] = useState(true);
+  const [labelsError, setLabelsError] = useState(false);
+  const [texts, setTexts] = useState<ImageText[]>();
+  const [textsLoading, setTextsLoading] = useState(true);
+  const [textsError, setTextsError] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
-  const analyse: () => void = () => {
-    getLabels(storageName, imageName)
-      .then((labels) => {
-        labels.forEach((label) => {
-          labelListTemp.push(
-            <li key={label.name}>
-              {label.name}
-              (conf.
-              {label.confidence}
-              )
-            </li>,
-          );
-        });
-        setlabelList(labelListTemp);
-      });
+  const getLabels = (): void => {
+    setLabelsLoading(true);
+    setLabelsError(false);
 
-    getTexts(storageName, imageName)
-      .then((texts) => {
-        texts.forEach((text) => {
-          textListTemp.push(
-            <li key={text.content}>
-              {text.content}
-              (conf.
-              {text.confidence}
-              )
-            </li>,
-          );
-        });
-        setTextList(textListTemp);
+    getLabels_(storageName, imageName)
+      .then((l) => {
+        setLabels(l);
+        setLabelsLoading(false);
+      })
+      .catch(() => {
+        setLabelsError(true);
+        enqueueSnackbar('An error occured while recogniting labels!', { variant: 'error' });
       });
   };
 
-  const style = {
-    // position: 'absolute', //fixme to wywala error, nie wiem czemu...?
-    // transform: 'translate(-50%, -50%)',
-    top: '50%',
-    left: '50%',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
+  const getTexts = (): void => {
+    setTextsLoading(true);
+    setTextsError(false);
+    getTexts_(storageName, imageName)
+      .then((t) => {
+        setTexts(t);
+        setTextsLoading(false);
+      })
+      .catch(() => {
+        setTextsError(true);
+        enqueueSnackbar('An error occured while recogniting text!', { variant: 'error' });
+      });
+  };
+
+  const analyse: () => void = () => {
+    getLabels();
+    getTexts();
   };
 
   const handleOpen: () => void = () => {
@@ -69,32 +76,101 @@ const AnalyseImage: React.FunctionComponent<Props> = ({ storageName, imageName }
 
   const shouldBeRendered: () => boolean = () => ['jpg', 'png', 'jpeg', 'gif'].map((ext) => imageName.endsWith(ext)).includes(true);
 
+  const labelsContent = (): JSX.Element => {
+    if (labelsError) {
+      return (<ErrorState onClick={getLabels} />);
+    }
+
+    if (labelsLoading) {
+      return (<LoadingState />);
+    }
+
+    if (labels?.length === 0) {
+      return (<EmptyState onClick={getLabels} />);
+    }
+
+    return (
+      <Table>
+        <TableHead>
+          <TableCell>
+            <b>Label</b>
+          </TableCell>
+          <TableCell align="right">
+            <b>Confidence</b>
+          </TableCell>
+        </TableHead>
+        <TableBody>
+          {labels && labels.map((label) => (
+            <TableRow key={label.name}>
+              <TableCell>{label.name}</TableCell>
+              <TableCell align="right">
+                {label.confidence.toFixed(2)}
+                %
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  };
+
+  const textsContent = (): JSX.Element => {
+    if (textsError) {
+      return (<ErrorState onClick={getTexts} />);
+    }
+
+    if (textsLoading) {
+      return (<LoadingState />);
+    }
+
+    if (texts?.length === 0) {
+      return (<EmptyState onClick={getTexts} />);
+    }
+
+    return (
+      <Table>
+        <TableHead>
+          <TableCell>
+            <b>Text</b>
+          </TableCell>
+          <TableCell align="right">
+            <b>Confidence</b>
+          </TableCell>
+        </TableHead>
+        <TableBody>
+          {texts && texts.map((text) => (
+            <TableRow key={text.content}>
+              <TableCell>{text.content}</TableCell>
+              <TableCell align="right">
+                {text.confidence.toFixed(2)}
+                %
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  };
+
   return shouldBeRendered() ? (
-    <div>
+    <>
       <IconButton size="small" onClick={handleOpen}>
         <ImageSearchIcon />
       </IconButton>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h5" component="h2">
-            {imageName}
+      <Dialog onClose={handleClose} open={open}>
+        <DialogTitle>
+          <Typography component="h2" variant="h6" color="primary" gutterBottom>
+            Rekognition
           </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }} variant="h6" component="h4">
-            Labels:
-          </Typography>
-          <ul>{labelList}</ul>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }} variant="h6" component="h4">
-            Detected text lines:
-          </Typography>
-          <ul>{textList}</ul>
-        </Box>
-      </Modal>
-    </div>
+        </DialogTitle>
+        <DialogContent dividers>
+          {labelsContent()}
+        </DialogContent>
+        <DialogContent dividers>
+          {textsContent()}
+        </DialogContent>
+      </Dialog>
+    </>
   ) : null;
 };
 

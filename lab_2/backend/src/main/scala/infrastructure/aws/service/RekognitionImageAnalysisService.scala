@@ -1,9 +1,8 @@
 package infrastructure.aws.service
 
-import cats.effect.Async
 import cats.effect.kernel.Sync
 import cats.effect.std.Console
-import cats.{Applicative, Functor}
+import cats.syntax.all._
 import domain.model.{ImageLabel, ImageText}
 import domain.spi.ImageAnalysisService
 import software.amazon.awssdk.services.rekognition.RekognitionClient
@@ -11,40 +10,31 @@ import software.amazon.awssdk.services.rekognition.model.{DetectLabelsRequest, D
 
 import scala.jdk.CollectionConverters.ListHasAsScala
 
-class RekognitionImageAnalysisService[F[_] : Functor : Async : Console : Applicative](rekognitionClient: RekognitionClient) extends ImageAnalysisService[F] {
-  override def getLabels(bucketName: String, imageName: String): F[Vector[ImageLabel]] = {
-    val myImage = getImage(bucketName, imageName)
-
-    val detectLabelsRequest = DetectLabelsRequest.builder()
-      .image(myImage)
-      .maxLabels(10)
-      .build()
-
-    val response = rekognitionClient.detectLabels(detectLabelsRequest)
-    val labels = response.labels().asScala
-      .map(label => ImageLabel(label.name(), label.confidence()))
+class RekognitionImageAnalysisService[F[_] : Sync : Console](rekognitionClient: RekognitionClient) extends ImageAnalysisService[F] {
+  override def getLabels(bucketName: String, imageName: String): F[Vector[ImageLabel]] =
+    for {
+      _ <- Sync[F].unit
+      detectLabelsRequest = DetectLabelsRequest.builder()
+        .image(prepareImage(bucketName, imageName))
+        .maxLabels(10)
+        .build()
+      detectLabelsResponse <- Sync[F].blocking(rekognitionClient.detectLabels(detectLabelsRequest))
+    } yield detectLabelsResponse.labels().asScala
+      .map(label => ImageLabel(label.name(), label.confidence())).distinctBy(_.name)
       .toVector
 
-    Sync[F].blocking(labels)
-  }
-
-  override def getTexts(bucketName: String, imageName: String): F[Vector[ImageText]] = {
-    val myImage = getImage(bucketName, imageName)
-
-    val detectLabelsRequest = DetectTextRequest.builder()
-      .image(myImage)
-      .build()
-
-    val response = rekognitionClient.detectText(detectLabelsRequest)
-
-    val texts = response.textDetections().asScala
-      .map(detection => ImageText(detection.detectedText(), detection.confidence()))
+  override def getTexts(bucketName: String, imageName: String): F[Vector[ImageText]] =
+    for {
+      _ <- Sync[F].unit
+      detectTextRequest = DetectTextRequest.builder()
+        .image(prepareImage(bucketName, imageName))
+        .build()
+      detectTextResponse <- Sync[F].blocking(rekognitionClient.detectText(detectTextRequest))
+    } yield detectTextResponse.textDetections().asScala
+      .map(detection => ImageText(detection.detectedText(), detection.confidence())).distinctBy(_.content)
       .toVector
 
-    Sync[F].blocking(texts)
-  }
-
-  def getImage(bucketName: String, imageName: String): Image = {
+  def prepareImage(bucketName: String, imageName: String): Image = {
     val s3Object = S3Object.builder()
       .bucket(bucketName)
       .name(imageName)
