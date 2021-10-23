@@ -10,3 +10,8 @@ export interface VirtualMachine {
   instanceId: string,
   stateName: string
 }
+
+export interface Language {
+  natural: string,
+  code: string
+}

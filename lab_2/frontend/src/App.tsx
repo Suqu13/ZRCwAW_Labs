@@ -21,6 +21,8 @@ import { SnackbarProvider } from 'notistack';
 import { ObjectStorageTable } from './pages/object-storage/ObjectStorageTable';
 import { LanguageAnalysisPage } from './pages/language-analysis/LanguageAnalysisPage';
 import { VirtualMachineTable } from './pages/virtual-machine/VirtualMachineTable';
+import { ReadTextPage } from './pages/read-text/ReadTextPage';
+import { TranslateTextPage } from './pages/translate-text/TranslateText';
 
 const App = (): JSX.Element => {
   const theme = createTheme();
@@ -75,6 +77,24 @@ const App = (): JSX.Element => {
                 >
                   Comprehend
                 </Link>
+                <Link
+                  component={RouterLink}
+                  variant="button"
+                  color="text.primary"
+                  to="polly"
+                  sx={{ my: 1, mx: 1.5 }}
+                >
+                  Polly
+                </Link>
+                <Link
+                  component={RouterLink}
+                  variant="button"
+                  color="text.primary"
+                  to="translate"
+                  sx={{ my: 1, mx: 1.5 }}
+                >
+                  Translate
+                </Link>
               </nav>
             </Toolbar>
           </AppBar>
@@ -92,6 +112,12 @@ const App = (): JSX.Element => {
               </Route>
               <Route path="/comprehend">
                 <LanguageAnalysisPage />
+              </Route>
+              <Route path="/polly">
+                <ReadTextPage />
+              </Route>
+              <Route path="/Translate">
+                <TranslateTextPage />
               </Route>
             </Switch>
           </Container>
