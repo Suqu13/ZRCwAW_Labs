@@ -2,22 +2,25 @@ package infrastructure.aws.client
 
 import cats.effect.std.Console
 import cats.effect.{Resource, Sync}
-import cats.syntax.all._
+import cats.implicits.catsSyntaxApplicativeError
 import infrastructure.configuration.AwsSdkConfig
 import software.amazon.awssdk.auth.credentials.{AwsSessionCredentials, StaticCredentialsProvider}
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.rekognition.RekognitionClient
+import software.amazon.awssdk.core.SdkClient
 
-object AwsRekognitionClient {
-  def apply[F[_] : Sync : Console](awsSdkConfig: AwsSdkConfig): Resource[F, RekognitionClient] =
+private[client] object AwsClient {
+  def apply[F[_] : Sync : Console, T <: SdkClient](awsSdkConfig: AwsSdkConfig, createSdkClient: StaticCredentialsProvider => T): Resource[F, T] =
     Resource.make {
       val credentialsProvider = StaticCredentialsProvider.create(AwsSessionCredentials.create(
         awsSdkConfig.secretKeyId,
         awsSdkConfig.secretAccessKey,
         awsSdkConfig.sessionToken
       ))
-      Sync[F].blocking(RekognitionClient.builder().region(Region.US_EAST_1).credentialsProvider(credentialsProvider).build())
+      Sync[F].blocking(createSdkClient(credentialsProvider))
     } { client =>
-      Sync[F].blocking(client.close()).handleErrorWith(e => Console[F].println(e.getMessage))
+      Sync[F].blocking(client.close())
+        .handleErrorWith(e =>
+          Console[F].println(e.getMessage)
+        )
     }
 }
+

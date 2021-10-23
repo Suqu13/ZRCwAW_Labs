@@ -92,12 +92,15 @@ const AnalyseImage: React.FunctionComponent<Props> = ({ storageName, imageName }
     return (
       <Table>
         <TableHead>
-          <TableCell>
-            <b>Label</b>
-          </TableCell>
-          <TableCell align="right">
-            <b>Confidence</b>
-          </TableCell>
+          <TableRow>
+            <TableCell>
+              <b>Label</b>
+            </TableCell>
+            <TableCell align="right">
+              <b>Confidence</b>
+            </TableCell>
+          </TableRow>
+
         </TableHead>
         <TableBody>
           {labels && labels.map((label) => (
@@ -130,12 +133,14 @@ const AnalyseImage: React.FunctionComponent<Props> = ({ storageName, imageName }
     return (
       <Table>
         <TableHead>
-          <TableCell>
-            <b>Text</b>
-          </TableCell>
-          <TableCell align="right">
-            <b>Confidence</b>
-          </TableCell>
+          <TableRow>
+            <TableCell>
+              <b>Text</b>
+            </TableCell>
+            <TableCell align="right">
+              <b>Confidence</b>
+            </TableCell>
+          </TableRow>
         </TableHead>
         <TableBody>
           {texts && texts.map((text) => (

@@ -1,0 +1,217 @@
+export const supportedLanguages: { natural: string, code: string }[] = [{
+  natural: 'Auto',
+  code: 'auto',
+}, {
+  natural: 'Afrikaans',
+  code: 'af',
+}, {
+  natural: 'Albanian',
+  code: 'sq',
+}, {
+  natural: 'Amharic',
+  code: 'am',
+}, {
+  natural: 'Arabic',
+  code: 'ar',
+}, {
+  natural: 'Armenian',
+  code: 'hy',
+}, {
+  natural: 'Azerbaijani',
+  code: 'az',
+}, {
+  natural: 'Bengali',
+  code: 'bn',
+}, {
+  natural: 'Bosnian',
+  code: 'bs',
+}, {
+  natural: 'Bulgarian',
+  code: 'bg',
+}, {
+  natural: 'Catalan',
+  code: 'ca',
+}, {
+  natural: 'Chinese (Simplified)',
+  code: 'zh',
+}, {
+  natural: 'Chinese (Traditional)',
+  code: 'zh-TW',
+}, {
+  natural: 'Croatian',
+  code: 'hr',
+}, {
+  natural: 'Czech',
+  code: 'cs',
+}, {
+  natural: 'Danish',
+  code: 'da',
+}, {
+  natural: 'Dari',
+  code: 'fa-AF',
+}, {
+  natural: 'Dutch',
+  code: 'nl',
+}, {
+  natural: 'English',
+  code: 'en',
+}, {
+  natural: 'Estonian',
+  code: 'et',
+}, {
+  natural: 'Farsi (Persian)',
+  code: 'fa',
+}, {
+  natural: 'Filipino, Tagalog',
+  code: 'tl',
+}, {
+  natural: 'Finnish',
+  code: 'fi',
+}, {
+  natural: 'French',
+  code: 'fr',
+}, {
+  natural: 'French (Canada)',
+  code: 'fr-CA',
+}, {
+  natural: 'Georgian',
+  code: 'ka',
+}, {
+  natural: 'German',
+  code: 'de',
+}, {
+  natural: 'Greek',
+  code: 'el',
+}, {
+  natural: 'Gujarati',
+  code: 'gu',
+}, {
+  natural: 'Haitian Creole',
+  code: 'ht',
+}, {
+  natural: 'Hausa',
+  code: 'ha',
+}, {
+  natural: 'Hebrew',
+  code: 'he',
+}, {
+  natural: 'Hindi',
+  code: 'hi',
+}, {
+  natural: 'Hungarian',
+  code: 'hu',
+}, {
+  natural: 'Icelandic',
+  code: 'is',
+}, {
+  natural: 'Indonesian',
+  code: 'id',
+}, {
+  natural: 'Italian',
+  code: 'it',
+}, {
+  natural: 'Japanese',
+  code: 'ja',
+}, {
+  natural: 'Kannada',
+  code: 'kn',
+}, {
+  natural: 'Kazakh',
+  code: 'kk',
+}, {
+  natural: 'Korean',
+  code: 'ko',
+}, {
+  natural: 'Latvian',
+  code: 'lv',
+}, {
+  natural: 'Lithuanian',
+  code: 'lt',
+}, {
+  natural: 'Macedonian',
+  code: 'mk',
+}, {
+  natural: 'Malay',
+  code: 'ms',
+}, {
+  natural: 'Malayalam',
+  code: 'ml',
+}, {
+  natural: 'Maltese',
+  code: 'mt',
+}, {
+  natural: 'Mongolian',
+  code: 'mn',
+}, {
+  natural: 'Norwegian',
+  code: 'no',
+}, {
+  natural: 'Pashto',
+  code: 'ps',
+}, {
+  natural: 'Polish',
+  code: 'pl',
+}, {
+  natural: 'Portuguese',
+  code: 'pt',
+}, {
+  natural: 'Romanian',
+  code: 'ro',
+}, {
+  natural: 'Russian',
+  code: 'ru',
+}, {
+  natural: 'Serbian',
+  code: 'sr',
+}, {
+  natural: 'Sinhala',
+  code: 'si',
+}, {
+  natural: 'Slovak',
+  code: 'sk',
+}, {
+  natural: 'Slovenian',
+  code: 'sl',
+}, {
+  natural: 'Somali',
+  code: 'so',
+}, {
+  natural: 'Spanish',
+  code: 'es',
+}, {
+  natural: 'Spanish (Mexico)',
+  code: 'es-MX',
+}, {
+  natural: 'Swahili',
+  code: 'sw',
+}, {
+  natural: 'Swedish',
+  code: 'sv',
+}, {
+  natural: 'Tamil',
+  code: 'ta',
+}, {
+  natural: 'Telugu',
+  code: 'te',
+}, {
+  natural: 'Thai',
+  code: 'th',
+}, {
+  natural: 'Turkish',
+  code: 'tr',
+}, {
+  natural: 'Ukrainian',
+  code: 'uk',
+}, {
+  natural: 'Urdu',
+  code: 'ur',
+}, {
+  natural: 'Uzbek',
+  code: 'uz',
+}, {
+  natural: 'Vietnaturalse',
+  code: 'vi',
+}, {
+  natural: 'Welsh',
+  code: 'cy',
+}];

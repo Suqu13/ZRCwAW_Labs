@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Box,
   Divider,
+  Grid,
   Paper,
   TextField,
   Typography,
@@ -58,7 +59,7 @@ const languageAnalyseHook = (): {
 };
 
 const LanguageAnalysisPage: React.FunctionComponent = () => {
-  const [text, setText] = useState('Provide text in any language.');
+  const [text, setText] = useState<string>();
   const {
     analyseLanguage,
     analyseSentiment,
@@ -69,43 +70,48 @@ const LanguageAnalysisPage: React.FunctionComponent = () => {
     setText(event.target.value);
   };
 
-  const content = (): JSX.Element => (
-    <>
+  return (
+    <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
       <Typography component="h2" variant="h6" color="primary" gutterBottom>
         Comprehend - Language Analysis
       </Typography>
-      <TextField
-        id="outlined-multiline-static"
-        label="Text"
-        multiline
-        rows={4}
-        value={text}
-        onChange={handleChange}
-        fullWidth
-      />
-      <Box sx={{ margin: '8px 0 8px 0' }}>
-        <Button variant="outlined" sx={{ marginRight: '4px' }} onClick={() => analyseLanguage(text)}>Language Analyis</Button>
-        <Button variant="outlined" onClick={() => analyseSentiment(text)}>Sentiment Analysis</Button>
-      </Box>
-      <Divider />
-      <Typography component="h4" variant="h6" color="primary" gutterBottom>
-        Result
-      </Typography>
-      <Box sx={{
-        padding: '8px', marginTop: '8px', border: '1px dashed grey', width: '100%', borderRadius: '4px',
-      }}
-      >
-        <JSONPretty data={result} />
-      </Box>
-    </>
-  );
-
-  return (
-    <>
-      <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-        {content()}
-      </Paper>
-    </>
+      <Grid container rowSpacing={2}>
+        <Grid item container>
+          <TextField
+            id="outlined-multiline-static"
+            label="Text"
+            multiline
+            rows={4}
+            value={text}
+            placeholder="Provide text in any language..."
+            onChange={handleChange}
+            fullWidth
+          />
+        </Grid>
+        <Grid item container direction="row" columnSpacing={2}>
+          <Grid item xs={6}>
+            <Button variant="outlined" onClick={() => text && analyseLanguage(text)} fullWidth>Language Analyis</Button>
+          </Grid>
+          <Grid item xs={6}>
+            <Button variant="outlined" onClick={() => text && analyseSentiment(text)} fullWidth>Sentiment Analysis</Button>
+          </Grid>
+        </Grid>
+        <Grid item xs={12}>
+          <Divider />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography component="h4" variant="h6" color="primary" gutterBottom>
+            Result
+          </Typography>
+          <Box sx={{
+            padding: '8px', border: '1px dashed grey', width: '100%', borderRadius: '4px',
+          }}
+          >
+            <JSONPretty mainStyle="background:none" data={result} />
+          </Box>
+        </Grid>
+      </Grid>
+    </Paper>
   );
 };
 

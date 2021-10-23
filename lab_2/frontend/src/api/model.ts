@@ -20,3 +20,8 @@ export interface ImageText {
   content: string,
   confidence: number
 }
+
+export interface Language {
+  natural: string,
+  code: string
+}
