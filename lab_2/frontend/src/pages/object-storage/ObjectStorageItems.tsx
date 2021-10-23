@@ -22,6 +22,7 @@ import { ErrorState } from '../../components/ErrorState';
 import { LoadingState } from '../../components/LoadingState';
 import { ConfirmationDialog } from '../../components/ConfirmationDialog';
 import { EmptyState } from '../../components/EmptyState';
+import { AnalyseImage } from '../../components/AnalyseImage';
 
 const objectStorageItemsHook = (storageName: string): {
   objectStorageItems: Array<ObjectItem>,
@@ -153,6 +154,9 @@ const ObjectStorageItems: React.FunctionComponent<Props> = ({ objectStorageName 
             <TableRow key={row.key}>
               <TableCell>
                 {row.key}
+              </TableCell>
+              <TableCell width="10%">
+                <AnalyseImage storageName={objectStorageName} imageName={row.key} />
               </TableCell>
               <TableCell width="10%">
                 <IconButton size="small" onClick={() => openDeletion(row.key)}>

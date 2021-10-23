@@ -1,11 +1,11 @@
 import cats.Monad
 import cats.effect.{ExitCode, IO, IOApp}
 import cats.syntax.semigroupk._
-import infrastructure.api.{LanguageAnalysisApi, ObjectStorageApi, ReadApi, TranslateApi, VirtualMachineApi}
-import infrastructure.aws.client.{AwsComprehendClient, AwsEc2Client, AwsPollyAsyncClient, AwsS3AsyncClient, AwsS3Client, AwsTranslateAsyncClient}
-import infrastructure.aws.service.{AwsPollyService, AwsTranslateService, ComprehendLanguageAnalysisService, Ec2VirtualMachineService, S3ObjectStorageService}
+import infrastructure.api._
+import infrastructure.aws.client._
+import infrastructure.aws.service._
 import infrastructure.configuration.Config
-import infrastructure.http.{HttpApi, HttpServer}
+import infrastructure.http.HttpServer
 import org.http4s.server.Router
 import org.http4s.{HttpApp, HttpRoutes}
 
@@ -20,8 +20,10 @@ object Main extends IOApp {
       comprehendClient <- AwsComprehendClient[IO](config.awsSdk)
       pollyAsyncClient <- AwsPollyAsyncClient[IO](config.awsSdk)
       translateAsyncClient <- AwsTranslateAsyncClient[IO](config.awsSdk)
-    } yield (s3Client, s3AsyncClient, ec2Client, comprehendClient, pollyAsyncClient, translateAsyncClient)) use {
-      case (s3Client, s3AsyncClient, ec2Client, comprehendClient, pollyAsyncClient, translateAsyncClient) =>
+      rekognitionClient <- AwsRekognitionClient[IO](config.awsSdk)
+
+    } yield (s3Client, s3AsyncClient, ec2Client, comprehendClient, pollyAsyncClient, translateAsyncClient, rekognitionClient)) use {
+      case (s3Client, s3AsyncClient, ec2Client, comprehendClient, pollyAsyncClient, translateAsyncClient, rekognitionClient) =>
         val s3Service = S3ObjectStorageService[IO](s3Client, s3AsyncClient)
         val s3Api = new ObjectStorageApi[IO](s3Service)
 
@@ -32,13 +34,22 @@ object Main extends IOApp {
         val comprehendApi = new LanguageAnalysisApi[IO](comprehendService)
 
         val readService = new AwsPollyService[IO](pollyAsyncClient)
-        val readApi= new ReadApi[IO](readService)
+        val readApi = new ReadApi[IO](readService)
 
         val translateService = new AwsTranslateService[IO](translateAsyncClient)
         val translateApi = new TranslateApi[IO](translateService)
 
+        val rekognitionService = new RekognitionImageAnalysisService[IO](rekognitionClient)
+        val rekognitionApi = new ImageAnalysisApi[IO](rekognitionService)
 
-        val routes = app(s3Api.routes, ec2Api.routes, comprehendApi.routes, readApi.routes, translateApi.routes)
+        val routes = app(
+          s3Api.routes,
+          ec2Api.routes,
+          comprehendApi.routes,
+          readApi.routes,
+          translateApi.routes,
+          rekognitionApi.routes
+        )
 
         HttpServer[IO](config.httpServer.host, config.httpServer.port, routes)
           .useForever

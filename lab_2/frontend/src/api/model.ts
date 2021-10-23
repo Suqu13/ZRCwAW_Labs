@@ -11,6 +11,16 @@ export interface VirtualMachine {
   stateName: string
 }
 
+export interface ImageLabel {
+  name: string,
+  confidence: number
+}
+
+export interface ImageText {
+  content: string,
+  confidence: number
+}
+
 export interface Language {
   natural: string,
   code: string

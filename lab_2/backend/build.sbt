@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
   "software.amazon.awssdk" % "s3" % amazonSdkVersion,
   "software.amazon.awssdk" % "ec2" % amazonSdkVersion,
   "software.amazon.awssdk" % "comprehend" % "2.17.57",
+  "software.amazon.awssdk" % "rekognition" % "2.17.57",
   "software.amazon.awssdk" % "translate" % amazonSdkVersion,
   "software.amazon.awssdk" % "polly" % amazonSdkVersion,
 
