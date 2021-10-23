@@ -59,7 +59,7 @@ const languageAnalyseHook = (): {
 };
 
 const LanguageAnalysisPage: React.FunctionComponent = () => {
-  const [text, setText] = useState('Provide text in any language.');
+  const [text, setText] = useState<string>();
   const {
     analyseLanguage,
     analyseSentiment,
@@ -83,16 +83,17 @@ const LanguageAnalysisPage: React.FunctionComponent = () => {
             multiline
             rows={4}
             value={text}
+            placeholder="Provide text in any language..."
             onChange={handleChange}
             fullWidth
           />
         </Grid>
         <Grid item container direction="row" columnSpacing={2}>
           <Grid item xs={6}>
-            <Button variant="outlined" onClick={() => analyseLanguage(text)} fullWidth>Language Analyis</Button>
+            <Button variant="outlined" onClick={() => text && analyseLanguage(text)} fullWidth>Language Analyis</Button>
           </Grid>
           <Grid item xs={6}>
-            <Button variant="outlined" onClick={() => analyseSentiment(text)} fullWidth>Sentiment Analysis</Button>
+            <Button variant="outlined" onClick={() => text && analyseSentiment(text)} fullWidth>Sentiment Analysis</Button>
           </Grid>
         </Grid>
         <Grid item xs={12}>
