@@ -6,6 +6,7 @@ import infrastructure.aws.client._
 import infrastructure.aws.service._
 import infrastructure.configuration.Config
 import infrastructure.http.HttpServer
+import infrastructure.security.Encryptor
 import org.http4s.server.Router
 import org.http4s.{HttpApp, HttpRoutes}
 
@@ -21,9 +22,9 @@ object Main extends IOApp {
       pollyAsyncClient <- AwsPollyAsyncClient[IO](config.awsSdk)
       translateAsyncClient <- AwsTranslateAsyncClient[IO](config.awsSdk)
       rekognitionClient <- AwsRekognitionClient[IO](config.awsSdk)
-
-    } yield (s3Client, s3AsyncClient, ec2Client, comprehendClient, pollyAsyncClient, translateAsyncClient, rekognitionClient)) use {
-      case (s3Client, s3AsyncClient, ec2Client, comprehendClient, pollyAsyncClient, translateAsyncClient, rekognitionClient) =>
+      dynamoDbClient <- DynamoDBClient[IO](config.awsSdk)
+    } yield (s3Client, s3AsyncClient, ec2Client, comprehendClient, pollyAsyncClient, translateAsyncClient, rekognitionClient, dynamoDbClient)) use {
+      case (s3Client, s3AsyncClient, ec2Client, comprehendClient, pollyAsyncClient, translateAsyncClient, rekognitionClient, dynamoDBClient) =>
         val s3Service = S3ObjectStorageService[IO](s3Client, s3AsyncClient)
         val s3Api = new ObjectStorageApi[IO](s3Service)
 
@@ -42,7 +43,12 @@ object Main extends IOApp {
         val rekognitionService = new RekognitionImageAnalysisService[IO](rekognitionClient)
         val rekognitionApi = new ImageAnalysisApi[IO](rekognitionService)
 
+        val usersService = new DynamoDbUserService[IO](dynamoDBClient)
+        val encryptor = new Encryptor(config.encryption.key)
+        val authenticationApi = new AuthenticationApi[IO](encryptor, usersService)
+
         val routes = app(
+          authenticationApi.routes,
           s3Api.routes,
           ec2Api.routes,
           comprehendApi.routes,

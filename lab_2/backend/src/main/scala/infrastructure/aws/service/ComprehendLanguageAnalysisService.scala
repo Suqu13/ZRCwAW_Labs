@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.comprehend.model.{DetectDominantLanguageR
 import scala.jdk.CollectionConverters._
 
 
-class ComprehendLanguageAnalysisService[F[_] : Functor : Sync : Console : Applicative](
+class ComprehendLanguageAnalysisService[F[_] : Sync : Console](
   comprehendClient: ComprehendClient
 ) extends LanguageAnalysisService[F] {
 
@@ -31,7 +31,7 @@ class ComprehendLanguageAnalysisService[F[_] : Functor : Sync : Console : Applic
           positive = r.sentimentScore().positive(),
           negative = r.sentimentScore().negative(),
           mixed = r.sentimentScore().mixed()
-        ))).map(s => Either.right(s))
+        ))).map(Either.right)
       })
     } yield sentiment)
 
