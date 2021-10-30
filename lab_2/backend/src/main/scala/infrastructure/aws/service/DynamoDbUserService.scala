@@ -40,17 +40,6 @@ class DynamoDbUserService[F[_] : Sync](dynamoDbClient: DynamoDbClient) extends U
     }
   } yield res
 
-/*  override def getUserBySessionId(sessionId: String): F[Either[UserFetchError, Option[User]]] = for {
-    queryRes <- Sync[F].blocking(dbExecutor.exec(usersTable.query("sessionId" === sessionId)))
-    res = queryRes.headOption match {
-      case Some(value) => value match {
-        case Left(_) => Either.left(UserFetchError("Unable to fetch user"))
-        case Right(user) => Either.right(Some(user))
-      }
-      case None => Either.right(Option.empty[User])
-    }
-  } yield res*/
-
   override def authenticate(credentials: Credentials): F[Either[AuthenticationError, Session]] = for {
     dbQuery <- getUserByLogin(credentials.login)
     res <- dbQuery.fold(
