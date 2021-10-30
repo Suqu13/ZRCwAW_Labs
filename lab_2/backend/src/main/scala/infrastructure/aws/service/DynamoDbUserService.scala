@@ -4,7 +4,7 @@ import cats.Applicative
 import cats.effect.kernel.Sync
 import cats.syntax.all._
 import domain.model.{Credentials, User}
-import domain.spi.{AuthenticationError, Session, UserCreationError, UserFetchError, UserService}
+import domain.spi._
 import org.scanamo.generic.auto._
 import org.scanamo.syntax._
 import org.scanamo.{DynamoReadError, Scanamo, Table}
@@ -39,6 +39,17 @@ class DynamoDbUserService[F[_] : Sync](dynamoDbClient: DynamoDbClient) extends U
       case None => Either.right(Option.empty[User])
     }
   } yield res
+
+/*  override def getUserBySessionId(sessionId: String): F[Either[UserFetchError, Option[User]]] = for {
+    queryRes <- Sync[F].blocking(dbExecutor.exec(usersTable.query("sessionId" === sessionId)))
+    res = queryRes.headOption match {
+      case Some(value) => value match {
+        case Left(_) => Either.left(UserFetchError("Unable to fetch user"))
+        case Right(user) => Either.right(Some(user))
+      }
+      case None => Either.right(Option.empty[User])
+    }
+  } yield res*/
 
   override def authenticate(credentials: Credentials): F[Either[AuthenticationError, Session]] = for {
     dbQuery <- getUserByLogin(credentials.login)

@@ -29,10 +29,10 @@ class AuthenticationApi[F[_] : Async](encryptor: Encryptor, userService: UserSer
           EitherT(userService.authenticate(user)).foldF(
             e => Applicative[F].pure(Response(Unauthorized).withEntity(e.msg)),
             session => {
-              val secret = encryptor.encryptToken(session.id)
+              val secret = encryptor.encryptToken(s"${user.login}@@@${session.id}")
               val expiryDate = HttpDate.unsafeFromInstant(OffsetDateTime.now().plusHours(1).toInstant)
               Ok().map(
-              _.addCookie(ResponseCookie("auth", secret, expires = Some(expiryDate), secure = true, httpOnly = true)))
+              _.addCookie(ResponseCookie("auth", secret, expires = Some(expiryDate), secure = false, httpOnly = true)))
             }
           )
         }

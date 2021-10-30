@@ -1,14 +1,15 @@
 import cats.Monad
 import cats.effect.{ExitCode, IO, IOApp}
 import cats.syntax.semigroupk._
+import domain.model.User
 import infrastructure.api._
 import infrastructure.aws.client._
 import infrastructure.aws.service._
 import infrastructure.configuration.Config
 import infrastructure.http.HttpServer
 import infrastructure.security.Encryptor
-import org.http4s.server.Router
-import org.http4s.{HttpApp, HttpRoutes}
+import org.http4s.server.{AuthMiddleware, Router}
+import org.http4s.{AuthedRoutes, HttpApp, HttpRoutes}
 
 object Main extends IOApp {
 
@@ -46,9 +47,10 @@ object Main extends IOApp {
         val usersService = new DynamoDbUserService[IO](dynamoDBClient)
         val encryptor = new Encryptor(config.encryption.key)
         val authenticationApi = new AuthenticationApi[IO](encryptor, usersService)
+        val basicAuth = BasicAuth(usersService, encryptor)
 
-        val routes = app(
-          authenticationApi.routes,
+        val routes = app(authenticationApi.routes)(
+          basicAuth,
           s3Api.routes,
           ec2Api.routes,
           comprehendApi.routes,
@@ -64,8 +66,12 @@ object Main extends IOApp {
 
   } yield server
 
-  def app[F[_] : Monad](apiRoutes: HttpRoutes[F]*): HttpApp[F] =
+  def app[F[_] : Monad](routes: HttpRoutes[F]*)(
+    authProvider: AuthMiddleware[F, User],
+    authedRoutes: AuthedRoutes[User, F]*
+  ): HttpApp[F] =
     Router(
-      "/api/v1" -> apiRoutes.foldLeft(HttpRoutes.empty[F])(_ <+> _)
+      "/api/v1" -> routes.foldLeft(HttpRoutes.empty[F])(_ <+> _)
+        .combineK(authProvider(authedRoutes.foldLeft(AuthedRoutes.empty[User, F])(_ <+> _)))
     ).orNotFound
 }
