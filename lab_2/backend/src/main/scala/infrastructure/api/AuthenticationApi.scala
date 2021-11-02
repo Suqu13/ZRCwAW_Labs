@@ -1,10 +1,9 @@
 package infrastructure.api
 
-import cats.Applicative
 import cats.data.EitherT
 import cats.effect.Async
 import cats.implicits.toFunctorOps
-import domain.model.Credentials
+import domain.model.User
 import domain.spi.UserService
 import infrastructure.http.HttpApi
 import infrastructure.security.Encryptor
@@ -25,11 +24,11 @@ class AuthenticationApi[F[_] : Async](encryptor: Encryptor, userService: UserSer
 
     HttpRoutes.of[F] {
       case req@POST -> Root / "login" =>
-        req.decode[Credentials] { user =>
+        req.decode[User.Credentials] { user =>
           EitherT(userService.authenticate(user)).foldF(
-            e => Applicative[F].pure(Response(Unauthorized).withEntity(e.msg)),
-            session => {
-              val secret = encryptor.encryptToken(s"${user.login}@@@${session.id}")
+            e => Async[F].pure(Response(Unauthorized).withEntity(e.msg)),
+            sessionId => {
+              val secret = encryptor.encryptToken(s"${user.login}@@@${sessionId}")
               val expiryDate = HttpDate.unsafeFromInstant(OffsetDateTime.now().plusHours(1).toInstant)
               Ok().map(
               _.addCookie(ResponseCookie("auth", secret, expires = Some(expiryDate), secure = false, httpOnly = true)))

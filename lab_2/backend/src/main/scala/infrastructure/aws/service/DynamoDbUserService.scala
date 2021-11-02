@@ -1,9 +1,8 @@
 package infrastructure.aws.service
 
-import cats.Applicative
 import cats.effect.kernel.Sync
 import cats.syntax.all._
-import domain.model.{Credentials, User}
+import domain.model.User
 import domain.spi._
 import org.scanamo.generic.auto._
 import org.scanamo.syntax._
@@ -17,21 +16,21 @@ class DynamoDbUserService[F[_] : Sync](dynamoDbClient: DynamoDbClient) extends U
   private lazy val dbExecutor = Scanamo(dynamoDbClient)
   private lazy val usersTable = Table[User]("Users")
 
-  override def createUser(user: User): F[Either[UserCreationError, Unit]] = for {
-    queryRes <- Sync[F].blocking(dbExecutor.exec(usersTable.scan()))
-    users <- queryRes.collect {
-      case Right(user) => Applicative[F].pure(user)
-    }.sequence
-    putRes <- if (users.exists(_.login.equals(user.login))) {
-      Applicative[F].pure(Either.left(UserCreationError("User with given login already exists.")))
-    } else {
-      Sync[F].blocking(dbExecutor.exec(usersTable.put(user))).map(Either.right)
-    }
+  override def createUser(credentials: User.Credentials): F[Either[UserCreationError, Unit]] = for {
+    userQuery <- getUserByLogin(credentials.login)
+    putRes <- userQuery.fold(
+      e => Sync[F].pure(Either.left(UserCreationError(e.msg))),
+      _.fold[F[Either[UserCreationError, Unit]]](
+        Sync[F].blocking(dbExecutor.exec(usersTable.put(User(credentials)))).map(Either.right)
+      )(_ =>
+        Sync[F].pure(Either.left(UserCreationError("Invalid data provided.")))
+      )
+    )
   } yield putRes
 
   override def getUserByLogin(login: String): F[Either[UserFetchError, Option[User]]] = for {
-    queryRes <- Sync[F].blocking(dbExecutor.exec(usersTable.get("login" === login)))
-    res = queryRes match {
+    userQuery <- Sync[F].blocking(dbExecutor.exec(usersTable.get("login" === login)))
+    res = userQuery match {
       case Some(value) => value match {
         case Left(_) => Either.left(UserFetchError("Unable to fetch user"))
         case Right(user) => Either.right(Some(user))
@@ -40,27 +39,27 @@ class DynamoDbUserService[F[_] : Sync](dynamoDbClient: DynamoDbClient) extends U
     }
   } yield res
 
-  override def authenticate(credentials: Credentials): F[Either[AuthenticationError, Session]] = for {
-    dbQuery <- getUserByLogin(credentials.login)
-    res <- dbQuery.fold(
-      e => Applicative[F].pure(Either.left(AuthenticationError(e.msg))),
+  override def authenticate(credentials: User.Credentials): F[Either[AuthenticationError, User.SessionId]] = for {
+    userQuery <- getUserByLogin(credentials.login)
+    res <- userQuery.fold(
+      e => Sync[F].pure(Either.left(AuthenticationError(e.msg))),
       {
         case Some(dbUser) if dbUser.password == credentials.password =>
           updateSessionId(dbUser).map(_.leftMap(_ => AuthenticationError("Unable to find user")))
         case Some(dbUser) =>
-          Applicative[F].pure(Either.left(AuthenticationError(s"Invalid password for ${dbUser.login}")))
+          Sync[F].pure(Either.left(AuthenticationError(s"Invalid password for ${dbUser.login}")))
         case None =>
-          Applicative[F].pure(Either.left(AuthenticationError(s"User ${credentials.login} does not exist")))
+          Sync[F].pure(Either.left(AuthenticationError(s"User ${credentials.login} does not exist")))
       }
     )
   } yield res
 
-  private def updateSessionId(user: User): F[Either[DynamoReadError, Session]] = {
+  private def updateSessionId(user: User): F[Either[DynamoReadError, User.SessionId]] = {
     val sessionId = UUID.randomUUID().toString
     for {
       res <- Sync[F].blocking(
         dbExecutor.exec(usersTable.update("login" === user.login, set("sessionId", Some(sessionId))))
       )
-    } yield res.map(_ => Session(sessionId))
+    } yield res.map(_ => sessionId)
   }
 }

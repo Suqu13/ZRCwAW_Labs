@@ -18,7 +18,7 @@ case class AwsSdkConfig(
 )
 
 case class ApiConfig(
-  adminUser: User
+  adminCredentials: User.Credentials
 )
 
 case class EncryptionConfig(

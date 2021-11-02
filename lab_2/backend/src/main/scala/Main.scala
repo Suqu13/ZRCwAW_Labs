@@ -24,8 +24,26 @@ object Main extends IOApp {
       translateAsyncClient <- AwsTranslateAsyncClient[IO](config.awsSdk)
       rekognitionClient <- AwsRekognitionClient[IO](config.awsSdk)
       dynamoDbClient <- DynamoDBClient[IO](config.awsSdk)
-    } yield (s3Client, s3AsyncClient, ec2Client, comprehendClient, pollyAsyncClient, translateAsyncClient, rekognitionClient, dynamoDbClient)) use {
-      case (s3Client, s3AsyncClient, ec2Client, comprehendClient, pollyAsyncClient, translateAsyncClient, rekognitionClient, dynamoDBClient) =>
+    } yield (
+      s3Client,
+      s3AsyncClient,
+      ec2Client,
+      comprehendClient,
+      pollyAsyncClient,
+      translateAsyncClient,
+      rekognitionClient,
+      dynamoDbClient
+    )) use {
+      case (
+        s3Client,
+        s3AsyncClient,
+        ec2Client,
+        comprehendClient,
+        pollyAsyncClient,
+        translateAsyncClient,
+        rekognitionClient,
+        dynamoDBClient
+        ) =>
         val s3Service = S3ObjectStorageService[IO](s3Client, s3AsyncClient)
         val s3Api = new ObjectStorageApi[IO](s3Service)
 

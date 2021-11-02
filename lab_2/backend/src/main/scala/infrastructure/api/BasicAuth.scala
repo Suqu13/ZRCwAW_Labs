@@ -1,8 +1,8 @@
 package infrastructure.api
 
+import cats.Monad
 import cats.data.{EitherT, Kleisli, OptionT}
 import cats.syntax.all._
-import cats.{Applicative, Monad}
 import domain.model.User
 import domain.spi.{AuthenticationError, UserService}
 import infrastructure.security.Encryptor
@@ -16,12 +16,12 @@ object BasicAuth {
     AuthMiddleware[F, AuthenticationError, User](authUser(userService, encryptor), onFailure)
 
   private def onFailure[F[_]: Monad]: AuthedRoutes[AuthenticationError, F] = Kleisli(r => OptionT.liftF(
-    Applicative[F].pure(Response(Unauthorized).withEntity(r.context.msg))))
+    Monad[F].pure(Response(Unauthorized).withEntity(r.context.msg))))
 
   private def authUser[F[_]: Monad](userService: UserService[F], encryptor: Encryptor): Kleisli[F, Request[F], Either[AuthenticationError, User]] = Kleisli({ req =>
     val cookieContent = for {
-      header <- req.headers.get[Cookie].toRight(AuthenticationError("Authentication info not provided"))
-      cookie <- header.values.toList.find(_.name == "auth").toRight(AuthenticationError("Authentication info not provided"))
+      header <- req.headers.get[Cookie].toRight(AuthenticationError("Authentication data not provided"))
+      cookie <- header.values.toList.find(_.name == "auth").toRight(AuthenticationError("Authentication data not provided"))
       res <- encryptor.decryptToken(cookie.content).toRight(AuthenticationError("Malformed authentication data"))
     } yield res
     cookieContent match {
@@ -35,7 +35,7 @@ object BasicAuth {
               e => Monad[F].pure(Either.left(AuthenticationError(e.msg))),
               {
                 case Some(user) if user.sessionId.contains(sessionId) => Monad[F].pure(Either.right(user))
-                case None => Monad[F].pure(Either.left(AuthenticationError("Invalid sessionId")))
+                case _ => Monad[F].pure(Either.left(AuthenticationError("Invalid sessionId")))
               }
             )
         } else Monad[F].pure(Either.left(AuthenticationError("Malformed authentication data")))
