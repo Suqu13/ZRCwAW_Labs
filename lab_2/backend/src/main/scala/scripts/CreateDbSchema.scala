@@ -12,6 +12,7 @@ object CreateDbSchema extends IOApp {
     _ <- DynamoDBClient[IO](config.awsSdk).use { client =>
       for {
         _ <- createTable(client, "login", "Users")
+        _ <- createTable(client, "id", "AccessLogs")
       } yield ()
     }
   } yield ExitCode.Success
