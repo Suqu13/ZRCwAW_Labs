@@ -30,10 +30,38 @@ import { ReadTextPage } from './pages/read-text/ReadTextPage';
 import { TranslateTextPage } from './pages/translate-text/TranslateText';
 import { UserContext } from './UserContext';
 
+const getCookie = (cookieName: string): string => {
+  const name = `${cookieName}=`;
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i += 1) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) === 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return '';
+};
+
+const setCookie = (cookieName: string, cookieValue: string, expiresInDays: number): void => {
+  const d = new Date();
+  d.setTime(d.getTime() + (expiresInDays * 24 * 60 * 60 * 1000));
+  const expires = `expires=${d.toUTCString()}`;
+  document.cookie = `${cookieName}=${cookieValue};${expires};path=/`;
+};
+
 const AppWrapper: React.FunctionComponent<{}> = () => {
   const { userName, setUserName } = useContext(UserContext);
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+
+  const userNameCookie: string = getCookie('userNameCookie');
+  if (userNameCookie !== '' && userNameCookie.length > 0) {
+    setUserName(userNameCookie);
+  }
 
   const handleChangeLogin = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setLogin(event.target.value);
@@ -57,6 +85,7 @@ const AppWrapper: React.FunctionComponent<{}> = () => {
             { variant: 'success' },
           );
           setUserName(login);
+          setCookie('userNameCookie', login, 1);
         }
       })
         .catch(() => {
