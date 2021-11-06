@@ -3,7 +3,7 @@ import cats.effect.{ExitCode, IO, IOApp}
 import cats.syntax.semigroupk._
 import domain.model.User
 import infrastructure.api._
-import infrastructure.api.middleware.AccessLogsMiddleware
+import infrastructure.api.middleware.{AccessLogsMiddleware, BasicAuthMiddleware}
 import infrastructure.aws.client._
 import infrastructure.aws.service._
 import infrastructure.configuration.Config
@@ -67,7 +67,7 @@ object Main extends IOApp {
         val encryptor = new Encryptor(config.encryption.key)
         val authenticationApi = new AuthenticationApi[IO](encryptor, usersService)
 
-        val basicAuth = BasicAuth(usersService, encryptor)
+        val basicAuth = BasicAuthMiddleware(usersService, encryptor)
 
         val accessLogsService = new DynamoDbAccessLogsService[IO](dynamoDBClient)
         val accessLogsMiddleware = new AccessLogsMiddleware[IO](accessLogsService)

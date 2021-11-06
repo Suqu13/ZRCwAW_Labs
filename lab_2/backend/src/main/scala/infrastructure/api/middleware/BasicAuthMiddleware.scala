@@ -1,4 +1,4 @@
-package infrastructure.api
+package infrastructure.api.middleware
 
 import cats.Monad
 import cats.data.{EitherT, Kleisli, OptionT}
@@ -11,14 +11,14 @@ import org.http4s.headers.Cookie
 import org.http4s.server.AuthMiddleware
 import org.http4s.{AuthedRoutes, Request, Response}
 
-object BasicAuth {
-  def apply[F[_]: Monad](userService: UserService[F], encryptor: Encryptor): AuthMiddleware[F, User] =
+object BasicAuthMiddleware {
+  def apply[F[_] : Monad](userService: UserService[F], encryptor: Encryptor): AuthMiddleware[F, User] =
     AuthMiddleware[F, AuthenticationError, User](authUser(userService, encryptor), onFailure)
 
-  private def onFailure[F[_]: Monad]: AuthedRoutes[AuthenticationError, F] = Kleisli(r => OptionT.liftF(
+  private def onFailure[F[_] : Monad]: AuthedRoutes[AuthenticationError, F] = Kleisli(r => OptionT.liftF(
     Monad[F].pure(Response(Unauthorized).withEntity(r.context.msg))))
 
-  private def authUser[F[_]: Monad](userService: UserService[F], encryptor: Encryptor): Kleisli[F, Request[F], Either[AuthenticationError, User]] = Kleisli({ req =>
+  private def authUser[F[_] : Monad](userService: UserService[F], encryptor: Encryptor): Kleisli[F, Request[F], Either[AuthenticationError, User]] = Kleisli({ req =>
     val cookieContent = for {
       header <- req.headers.get[Cookie].toRight(AuthenticationError("Authentication data not provided"))
       cookie <- header.values.toList.find(_.name == "auth").toRight(AuthenticationError("Authentication data not provided"))
