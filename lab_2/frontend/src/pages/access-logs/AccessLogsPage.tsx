@@ -17,9 +17,11 @@ import {
 } from '@mui/lab';
 import { AccessLog } from '../../api/model';
 import { Filters, getAccessLogs } from '../../api/access-logs-api';
+import { LoadingState } from '../../components/LoadingState';
 
 const AccessLogsPage: React.FC = () => {
   const [accessLogs, setAccessLogs] = useState<Array<AccessLog>>([]);
+  const [loading, setLoading] = useState(true);
 
   const columns: MUIDataTableColumnDef[] = [
     {
@@ -242,14 +244,25 @@ const AccessLogsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    getAccessLogs({}).then((r) => setAccessLogs(r));
+    getAccessLogs({}).then((r) => {
+      setAccessLogs(r);
+      setLoading(false);
+    });
   }, []);
+
+  const datatable = (
+    <span className="datatable_span">
+      <MUIDataTable title="Access Logs" data={accessLogs} columns={columns} options={options} />
+    </span>
+  );
+
+  const content = loading ? (
+    <LoadingState />
+  ) : datatable;
 
   return (
     <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-      <span className="datatable_span">
-        <MUIDataTable title="Access Logs" data={accessLogs} columns={columns} options={options} />
-      </span>
+      {content}
     </Paper>
   );
 };

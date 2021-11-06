@@ -246,7 +246,7 @@ const AppWrapper: React.FunctionComponent<{}> = () => {
               to="accessLogs"
               sx={{ my: 1, mx: 1.5 }}
             >
-              Translate
+              ACCESS LOGS
             </Link>
           </nav>
         </Toolbar>
