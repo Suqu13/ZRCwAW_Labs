@@ -18,10 +18,12 @@ import {
 import { AccessLog } from '../../api/model';
 import { Filters, getAccessLogs } from '../../api/access-logs-api';
 import { LoadingState } from '../../components/LoadingState';
+import { ErrorState } from '../../components/ErrorState';
 
 const AccessLogsPage: React.FC = () => {
   const [accessLogs, setAccessLogs] = useState<Array<AccessLog>>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const columns: MUIDataTableColumnDef[] = [
     {
@@ -243,11 +245,20 @@ const AccessLogsPage: React.FC = () => {
     selectableRows: 'none',
   };
 
-  useEffect(() => {
+  const reloadLogs = (): void => {
+    setError(false);
+    setLoading(true);
     getAccessLogs({}).then((r) => {
       setAccessLogs(r);
       setLoading(false);
-    });
+    })
+      .catch(() => {
+        setError(true);
+      });
+  };
+
+  useEffect(() => {
+    reloadLogs();
   }, []);
 
   const datatable = (
@@ -256,9 +267,15 @@ const AccessLogsPage: React.FC = () => {
     </span>
   );
 
-  const content = loading ? (
-    <LoadingState />
-  ) : datatable;
+  // ugly but unable to do functional style comparison because of eslint 'no-nested-ternary' rule
+  let content = null;
+  if (error) {
+    content = <ErrorState onClick={reloadLogs} />;
+  } else if (loading) {
+    content = <LoadingState />;
+  } else {
+    content = datatable;
+  }
 
   return (
     <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
