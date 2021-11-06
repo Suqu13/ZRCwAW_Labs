@@ -21,6 +21,7 @@ import {
   Redirect,
   Switch,
 } from 'react-router-dom';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useSnackbar } from 'notistack';
 import { signIn as signIn_ } from './api/authentication-api';
 import { ObjectStorageTable } from './pages/object-storage/ObjectStorageTable';
@@ -95,6 +96,15 @@ const AppWrapper: React.FunctionComponent<{}> = () => {
           );
         });
     }
+  };
+
+  const signOut = (): void => {
+    setUserName('');
+    setCookie('userNameCookie', '', 1);
+    enqueueSnackbar(
+      'Signed out successfuly',
+      { variant: 'success' },
+    );
   };
 
   const loginView = (
@@ -174,6 +184,14 @@ const AppWrapper: React.FunctionComponent<{}> = () => {
             User:
             {userName}
           </Typography>
+          <Button
+            type="button"
+            variant="contained"
+            onClick={signOut}
+          >
+            Sign out
+            <LogoutIcon sx={{ ml: 1 }} />
+          </Button>
           <nav>
             <Link
               component={RouterLink}
