@@ -1,10 +1,10 @@
 import React from 'react';
-import CssBaseline from '@mui/material/CssBaseline';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import {
+  CssBaseline,
+  AppBar,
   Container,
+  Toolbar,
+  Typography,
   createTheme,
   GlobalStyles,
   Link,
@@ -18,10 +18,8 @@ import {
   Switch,
 } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
-import DateFnsUtils from '@date-io/date-fns';
-import {
-  MuiPickersUtilsProvider,
-} from '@material-ui/pickers';
+import DateAdapter from '@mui/lab/AdapterDateFns';
+import { LocalizationProvider } from '@mui/lab';
 import { ObjectStorageTable } from './pages/object-storage/ObjectStorageTable';
 import { LanguageAnalysisPage } from './pages/language-analysis/LanguageAnalysisPage';
 import { VirtualMachineTable } from './pages/virtual-machine/VirtualMachineTable';
@@ -33,7 +31,7 @@ const App = (): JSX.Element => {
   const theme = createTheme();
 
   return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+    <LocalizationProvider dateAdapter={DateAdapter}>
       <SnackbarProvider maxSnack={3}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
@@ -142,7 +140,7 @@ const App = (): JSX.Element => {
           </Router>
         </ThemeProvider>
       </SnackbarProvider>
-    </MuiPickersUtilsProvider>
+    </LocalizationProvider>
   );
 };
 

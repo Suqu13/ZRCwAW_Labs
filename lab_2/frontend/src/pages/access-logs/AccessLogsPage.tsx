@@ -9,12 +9,14 @@ import MUIDataTable, {
 import {
   FormLabel,
   FormGroup,
+  TextField,
+  Paper,
 } from '@mui/material';
 import {
   DatePicker,
-} from '@material-ui/pickers';
+} from '@mui/lab';
 import { AccessLog } from '../../api/model';
-import { getAccessLogs } from '../../api/access-logs-api';
+import { Filters, getAccessLogs } from '../../api/access-logs-api';
 
 const AccessLogsPage: React.FC = () => {
   const [accessLogs, setAccessLogs] = useState<Array<AccessLog>>([]);
@@ -149,17 +151,15 @@ const AccessLogsPage: React.FC = () => {
         customFilterListOptions: {
           render: (v) => {
             if (v[0] && v[1]) {
-              return [`Date from: ${v[0]}, Date to: ${v[1]}`];
+              return [`Date from: ${new Date(v[0]).toISOString().split('T')[0]}, Date to: ${new Date(v[1]).toISOString().split('T')[0]}`];
             } if (v[0]) {
-              return `Date from: ${v[0]}`;
+              return `Date from: ${new Date(v[0]).toISOString().split('T')[0]}`;
             } if (v[1]) {
-              return `Date to: ${v[1]}`;
+              return `Date to: ${new Date(v[1]).toISOString().split('T')[0]}`;
             }
             return [];
           },
           update: (filterList, filterPos, index) => {
-            console.log('customFilterListOnDelete: ', filterList, filterPos, index);
-
             if (filterPos === 0) {
               filterList[index].splice(filterPos, 1, '');
             } else if (filterPos === 1) {
@@ -168,11 +168,11 @@ const AccessLogsPage: React.FC = () => {
               // eslint-disable-next-line no-param-reassign
               filterList[index] = [];
             }
-
             return filterList;
           },
         },
         filterOptions: {
+          fullWidth: true,
           names: [],
           logic: (age, filters) => {
             if (filters[0] && filters[1]) {
@@ -187,28 +187,30 @@ const AccessLogsPage: React.FC = () => {
           display: (filterList, onChange, index, column) => (
             <div>
               <FormLabel>Date</FormLabel>
-              <FormGroup row>
+              <FormGroup sx={{ mt: '0.5rem', gap: '1rem' }}>
                 <DatePicker
-                  label="Date from"
-                  variant="inline"
+                  label="From"
                   value={filterList[index][0]}
                   maxDate={filterList[index][1]}
                   onChange={(e) => {
-                  // eslint-disable-next-line no-param-reassign
-                    filterList[index][0] = e?.toDateString() || '';
+                    // eslint-disable-next-line no-param-reassign
+                    filterList[index][0] = e || '';
                     onChange(filterList[index], index, column);
                   }}
+                  renderInput={(params) => <TextField {...params} />}
+                  inputFormat="yyyy-MM-dd"
                 />
                 <DatePicker
-                  label="Date from"
-                  variant="inline"
+                  label="To"
                   value={filterList[index][1]}
                   minDate={filterList[index][0]}
                   onChange={(e) => {
                     // eslint-disable-next-line no-param-reassign
-                    filterList[index][1] = e?.toDateString() || '';
+                    filterList[index][1] = e || '';
                     onChange(filterList[index], index, column);
                   }}
+                  renderInput={(params) => <TextField {...params} />}
+                  inputFormat="yyyy-MM-dd"
                 />
               </FormGroup>
             </div>
@@ -222,8 +224,14 @@ const AccessLogsPage: React.FC = () => {
 
   const options: MUIDataTableOptions = {
     filter: true,
-    onFilterChange: (changedColumn: string | MUIDataTableColumn | null, filterList: MUIDataTableState['filterList']) => {
-      console.log(changedColumn, filterList);
+    onFilterChange: (_: string | MUIDataTableColumn | null, filterList: MUIDataTableState['filterList']) => {
+      const tempFilters: Filters = ({
+        method: filterList[4][0],
+        userLogin: filterList[12][0],
+        from: filterList[14][0] ? new Date(filterList[14][0]) : undefined,
+        to: filterList[14][1] ? new Date(filterList[14][1]) : undefined,
+      });
+      getAccessLogs(tempFilters).then((r) => setAccessLogs(r));
     },
     filterType: 'dropdown',
     search: false,
@@ -234,13 +242,15 @@ const AccessLogsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    getAccessLogs().then((r) => setAccessLogs(r));
+    getAccessLogs({}).then((r) => setAccessLogs(r));
   }, []);
 
   return (
-    <>
-      <MUIDataTable title="Access Logs" data={accessLogs} columns={columns} options={options} />
-    </>
+    <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
+      <span className="datatable_span">
+        <MUIDataTable title="Access Logs" data={accessLogs} columns={columns} options={options} />
+      </span>
+    </Paper>
   );
 };
 
