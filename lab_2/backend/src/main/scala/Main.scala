@@ -3,6 +3,7 @@ import cats.effect.{ExitCode, IO, IOApp}
 import cats.syntax.semigroupk._
 import domain.model.User
 import infrastructure.api._
+import infrastructure.api.middleware.{AccessLogsMiddleware, BasicAuthMiddleware}
 import infrastructure.aws.client._
 import infrastructure.aws.service._
 import infrastructure.configuration.Config
@@ -67,30 +68,45 @@ object Main extends IOApp {
 
         val encryptor = new Encryptor(config.encryption.key)
         val authenticationApi = new AuthenticationApi[IO](encryptor, usersService)
-        val basicAuth = BasicAuth(usersService, encryptor)
 
-        val routes = app(authenticationApi.routes)(
-          basicAuth,
+        val basicAuth = BasicAuthMiddleware(usersService, encryptor)
+
+        val accessLogsService = new DynamoDbAccessLogsService[IO](dynamoDBClient)
+        val accessLogsMiddleware = new AccessLogsMiddleware[IO](accessLogsService)
+        val accessLogsApi = new AccessLogsApi[IO](accessLogsService)
+
+        val routes = Vector(authenticationApi.routes)
+          .map(accessLogsMiddleware.wrapRoutes)
+
+        val authedRoutes = Vector(
           s3Api.routes,
           ec2Api.routes,
           comprehendApi.routes,
           readApi.routes,
           translateApi.routes,
           rekognitionApi.routes,
-          userManagementApi.routes
+          accessLogsApi.routes,
+          userManagementApi.routes,
+        ).map(accessLogsMiddleware.wrapAuthedRoutes)
+
+        val httpApp = app(
+          routes,
+          authedRoutes,
+          basicAuth
         )
 
-        HttpServer[IO](config.httpServer.host, config.httpServer.port, routes)
+        HttpServer[IO](config.httpServer.host, config.httpServer.port, httpApp)
           .useForever
           .as(ExitCode.Success)
     }
 
   } yield server
 
-  def app[F[_] : Monad](routes: HttpRoutes[F]*)(
-    authProvider: AuthMiddleware[F, User],
-    authedRoutes: AuthedRoutes[User, F]*
-  ): HttpApp[F] =
+  def app[F[_] : Monad](
+                         routes: Vector[HttpRoutes[F]],
+                         authedRoutes: Vector[AuthedRoutes[User, F]],
+                         authProvider: AuthMiddleware[F, User]
+                       ): HttpApp[F] =
     Router(
       "/api/v1" -> routes.foldLeft(HttpRoutes.empty[F])(_ <+> _)
         .combineK(authProvider(authedRoutes.foldLeft(AuthedRoutes.empty[User, F])(_ <+> _)))
