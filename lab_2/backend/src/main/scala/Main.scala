@@ -64,6 +64,8 @@ object Main extends IOApp {
         val rekognitionApi = new ImageAnalysisApi[IO](rekognitionService)
 
         val usersService = new DynamoDbUserService[IO](dynamoDBClient)
+        val userManagementApi = new UserManagementApi[IO](usersService)
+
         val encryptor = new Encryptor(config.encryption.key)
         val authenticationApi = new AuthenticationApi[IO](encryptor, usersService)
 
@@ -83,7 +85,8 @@ object Main extends IOApp {
           readApi.routes,
           translateApi.routes,
           rekognitionApi.routes,
-          accessLogsApi.routes
+          accessLogsApi.routes,
+          userManagementApi.routes,
         ).map(accessLogsMiddleware.wrapAuthedRoutes)
 
         val httpApp = app(
