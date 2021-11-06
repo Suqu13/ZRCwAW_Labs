@@ -30,6 +30,7 @@ import { VirtualMachineTable } from './pages/virtual-machine/VirtualMachineTable
 import { ReadTextPage } from './pages/read-text/ReadTextPage';
 import { TranslateTextPage } from './pages/translate-text/TranslateText';
 import { UserContext } from './UserContext';
+import { AccessLogsPage } from './pages/access-logs/AccessLogsPage';
 
 const getCookie = (cookieName: string): string => {
   const name = `${cookieName}=`;
@@ -238,6 +239,15 @@ const AppWrapper: React.FunctionComponent<{}> = () => {
             >
               Translate
             </Link>
+            <Link
+              component={RouterLink}
+              variant="button"
+              color="text.primary"
+              to="accessLogs"
+              sx={{ my: 1, mx: 1.5 }}
+            >
+              Translate
+            </Link>
           </nav>
         </Toolbar>
       </AppBar>
@@ -259,8 +269,11 @@ const AppWrapper: React.FunctionComponent<{}> = () => {
           <Route path="/polly">
             <ReadTextPage />
           </Route>
-          <Route path="/Translate">
+          <Route path="/translate">
             <TranslateTextPage />
+          </Route>
+          <Route path="/accessLogs">
+            <AccessLogsPage />
           </Route>
         </Switch>
       </Container>
