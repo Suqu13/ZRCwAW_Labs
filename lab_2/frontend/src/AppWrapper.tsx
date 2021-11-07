@@ -1,14 +1,10 @@
-import React, { useContext, useState } from 'react';
-import CssBaseline from '@mui/material/CssBaseline';
+import React, { useContext, useEffect, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import {
   Container,
-  createTheme,
-  GlobalStyles,
   Link,
-  ThemeProvider,
   Grid,
   Paper,
   TextField,
@@ -60,10 +56,12 @@ const AppWrapper: React.FunctionComponent<{}> = () => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
 
-  const userNameCookie: string = getCookie('userNameCookie');
-  if (userNameCookie !== '' && userNameCookie.length > 0) {
-    setUserName(userNameCookie);
-  }
+  useEffect(() => {
+    const userNameCookie: string = getCookie('userNameCookie');
+    if (userNameCookie !== '' && userNameCookie.length > 0) {
+      setUserName(userNameCookie);
+    }
+  }, [setUserName]);
 
   const handleChangeLogin = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setLogin(event.target.value);
@@ -109,64 +107,70 @@ const AppWrapper: React.FunctionComponent<{}> = () => {
   };
 
   const loginView = (
-    <AppBar
-      position="static"
-      color="default"
-      elevation={0}
-      sx={{ borderBottom: (t) => `1px solid ${t.palette.divider}` }}
-    >
-      <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          signIn();
-        }}
-        >
-          <Grid
-            container
-            rowSpacing={2}
-            direction="column"
-            alignItems="center"
-          >
-            <Grid item xs={4}>
-              <Typography component="h2" variant="h6" color="primary" gutterBottom>
-                Sign in to app
-              </Typography>
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                id="outlined-basic"
-                label="Login"
-                value={login}
-                placeholder="Provide a login"
-                onChange={handleChangeLogin}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                id="outlined-basic"
-                label="Password"
-                value={password}
-                type="password"
-                placeholder="Provide a password"
-                onChange={handleChangePassword}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={!checkIfFormIsCorrectlyFilled()}
-                fullWidth
+    <Container component="main">
+      <Grid
+        container
+        spacing={0}
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        sx={{ minHeight: '100vh' }}
+      >
+        <Grid item>
+          <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              signIn();
+            }}
+            >
+              <Grid
+                container
+                rowSpacing={2}
+                direction="column"
+                alignItems="center"
               >
-                Sign in
-              </Button>
-            </Grid>
-          </Grid>
-        </form>
-      </Paper>
-    </AppBar>
+                <Grid item xs={4}>
+                  <Typography component="h2" variant="h6" color="primary" gutterBottom>
+                    Sign in to app
+                  </Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    id="outlined-basic"
+                    label="Login"
+                    value={login}
+                    placeholder="Provide a login"
+                    onChange={handleChangeLogin}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    id="outlined-basic"
+                    label="Password"
+                    value={password}
+                    type="password"
+                    placeholder="Provide a password"
+                    onChange={handleChangePassword}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={!checkIfFormIsCorrectlyFilled()}
+                    fullWidth
+                  >
+                    Sign in
+                  </Button>
+                </Grid>
+              </Grid>
+            </form>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Container>
   );
 
   const appView = (
@@ -182,73 +186,70 @@ const AppWrapper: React.FunctionComponent<{}> = () => {
             ZRCWaw Lab
           </Typography>
           <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            User:
-            {userName}
+            User: {userName}
           </Typography>
+          <Link
+            component={RouterLink}
+            variant="button"
+            color="text.primary"
+            to="s3"
+            sx={{ my: 1, mx: 1.5 }}
+          >
+            S3
+          </Link>
+          <Link
+            component={RouterLink}
+            variant="button"
+            color="text.primary"
+            to="ec2"
+            sx={{ my: 1, mx: 1.5 }}
+          >
+            EC2
+          </Link>
+          <Link
+            component={RouterLink}
+            variant="button"
+            color="text.primary"
+            to="comprehend"
+            sx={{ my: 1, mx: 1.5 }}
+          >
+            Comprehend
+          </Link>
+          <Link
+            component={RouterLink}
+            variant="button"
+            color="text.primary"
+            to="polly"
+            sx={{ my: 1, mx: 1.5 }}
+          >
+            Polly
+          </Link>
+          <Link
+            component={RouterLink}
+            variant="button"
+            color="text.primary"
+            to="translate"
+            sx={{ my: 1, mx: 1.5 }}
+          >
+            Translate
+          </Link>
+          <Link
+            component={RouterLink}
+            variant="button"
+            color="text.primary"
+            to="accessLogs"
+            sx={{ my: 1, mx: 1.5 }}
+          >
+            ACCESS LOGS
+          </Link>
           <Button
+            sx={{ ml: '1rem' }}
             type="button"
             variant="contained"
             onClick={signOut}
           >
-            Sign out
             <LogoutIcon sx={{ ml: 1 }} />
           </Button>
-          <nav>
-            <Link
-              component={RouterLink}
-              variant="button"
-              color="text.primary"
-              to="s3"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              S3
-            </Link>
-            <Link
-              component={RouterLink}
-              variant="button"
-              color="text.primary"
-              to="ec2"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              EC2
-            </Link>
-            <Link
-              component={RouterLink}
-              variant="button"
-              color="text.primary"
-              to="comprehend"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Comprehend
-            </Link>
-            <Link
-              component={RouterLink}
-              variant="button"
-              color="text.primary"
-              to="polly"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Polly
-            </Link>
-            <Link
-              component={RouterLink}
-              variant="button"
-              color="text.primary"
-              to="translate"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              Translate
-            </Link>
-            <Link
-              component={RouterLink}
-              variant="button"
-              color="text.primary"
-              to="accessLogs"
-              sx={{ my: 1, mx: 1.5 }}
-            >
-              ACCESS LOGS
-            </Link>
-          </nav>
         </Toolbar>
       </AppBar>
 
@@ -282,19 +283,10 @@ const AppWrapper: React.FunctionComponent<{}> = () => {
 
   const appContent = userName === '' ? loginView : appView;
 
-  const theme = createTheme();
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <GlobalStyles
-        styles={{
-          ul: { margin: 0, padding: 0, listStyle: 'none' },
-          a: { textDecoration: 'none !important' },
-        }}
-      />
-      <CssBaseline />
+    <>
       {appContent}
-    </ThemeProvider>
+    </>
   );
 };
 

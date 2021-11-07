@@ -1,9 +1,13 @@
 import { createContext } from 'react';
 
-const UserContext = createContext({
+interface UserContextProps {
+  userName: string,
+  setUserName: (a: string) => void
+}
+
+const UserContext = createContext<UserContextProps>({
   userName: '',
-  // eslint's rule no-unused-vars forces me to do console.log(a)
-  setUserName: (a: string) => { console.log(a); },
+  setUserName: () => {},
 });
 
 export { UserContext };

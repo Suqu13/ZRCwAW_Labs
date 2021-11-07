@@ -53,6 +53,7 @@
                 ]
             }
         ],
+        "react/jsx-one-expression-per-line": "off",
         "@typescript-eslint/ban-types": [
             "error",
             {
