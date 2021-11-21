@@ -74,7 +74,7 @@ const AnalyseImage: React.FunctionComponent<Props> = ({ storageName, imageName }
   };
   const handleClose: () => void = () => setOpen(false);
 
-  const shouldBeRendered: () => boolean = () => ['jpg', 'png', 'jpeg', 'gif'].map((ext) => imageName.endsWith(ext)).includes(true);
+  const shouldBeRendered: () => boolean = () => ['jpg', 'png', 'jpeg', 'gif'].map((ext) => imageName.toLowerCase().endsWith(ext)).includes(true);
 
   const labelsContent = (): JSX.Element => {
     if (labelsError) {
